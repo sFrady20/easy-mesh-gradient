@@ -39,8 +39,12 @@ function App() {
             <a
               href={"https://www.npmjs.com/package/easy-mesh-gradient"}
               target="_blank"
+              aria-label="Link to Easy Mesh Gradient on NPM"
             >
-              <button className="px-4 h-40px border-1px  rounded-xl flex items-center space-x-2 hover:(bg-gray-50 border-gray-300)">
+              <button
+                className="px-4 h-40px border-1px  rounded-xl flex items-center space-x-2 hover:(bg-gray-50 border-gray-300)"
+                aria-label="Easy Mesh Gradient on NPM"
+              >
                 <code className="tracking-tight text-sm">
                   npm install easy-mesh-gradient
                 </code>
@@ -49,8 +53,12 @@ function App() {
             <a
               href={"https://github.com/sFrady20/easy-mesh-gradient"}
               target="_blank"
+              aria-label="Link to Easy Mesh Gradient GitHub repo"
             >
-              <button className="px-3 h-40px border-1px border-transparent rounded-xl flex items-center space-x-2 hover:(bg-gray-50 border-gray-300)">
+              <button
+                className="px-3 h-40px border-1px border-transparent rounded-xl flex items-center space-x-2 hover:(bg-gray-50 border-gray-300)"
+                aria-label="Easy Mesh Gradient GitHub repo"
+              >
                 <GitHubIcon />
               </button>
             </a>
@@ -75,6 +83,7 @@ function App() {
                   ? "hover:(bg-gray-50)"
                   : "opacity-30 cursor-not-allowed"
               }`}
+              aria-label={"previous gradient"}
               onClick={
                 state.current > 0
                   ? () => setState((x) => ({ ...x, current: x.current - 1 }))
@@ -89,6 +98,7 @@ function App() {
                   ? "hover:(bg-gray-50)"
                   : "opacity-30 cursor-not-allowed"
               }`}
+              aria-label={"next gradient"}
               onClick={
                 state.current < state.history.length - 1
                   ? () => setState((x) => ({ ...x, current: x.current + 1 }))
@@ -99,6 +109,7 @@ function App() {
             </button>
             <button
               className="px-6 h-50px border-1px rounded-full flex items-center space-x-2 bg-black text-white hover:(bg-gray-900)"
+              aria-label={"randomize gradient"}
               onClick={() => {
                 setState((x) => ({
                   ...x,
@@ -122,6 +133,7 @@ function App() {
           className="tracking-tighter underline hover:(underline-transparent)"
           href={"https://stevenfrady.com"}
           target={"_blank"}
+          aria-label={"Go to Steven Frady's webite"}
         >
           Steven Frady
         </a>
