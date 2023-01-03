@@ -1,6 +1,6 @@
 {
   "name": "easy-mesh-gradient",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "type": "module",
   "files": [
     "dist"
@@ -8,6 +8,14 @@
   "main": "dist/easy-mesh-gradient.umd.cjs",
   "module": "dist/easy-mesh-gradient.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "url": "https://github.com/sFrady20/easy-mesh-gradient"
+  },
+  "author": {
+    "name": "Steven Frady",
+    "email": "sfrady20@gmail.com",
+    "url": "https://stevenfrady.com"
+  },
   "devDependencies": {
     "@types/seedrandom": "^3.0.4",
     "vite": "^4.0.3",

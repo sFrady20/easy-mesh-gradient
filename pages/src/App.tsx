@@ -5,10 +5,7 @@ import CasinoIcon from "@mui/icons-material/CasinoOutlined";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { Tooltip } from "@mui/material";
-
-//1.of9aom2sgo
-//features - seeding (deterministic), easing, pure css
+import libPkg from "../../lib/package.json";
 
 function App() {
   const [state, setState] = useState<{ history: string[]; current: number }>({
@@ -34,11 +31,13 @@ function App() {
                 Easy Mesh Gradient
               </div>
             </a>
-            <div className="tracking-tight text-sm font-light">v0.0.1</div>
+            <div className="tracking-tight text-sm font-light">
+              v{libPkg.version}
+            </div>
           </div>
           <div className="flex items-center space-x-3">
             <a
-              href={"https://github.com/sFrady20/easy-mesh-gradient"}
+              href={"https://www.npmjs.com/package/easy-mesh-gradient"}
               target="_blank"
             >
               <button className="px-4 h-40px border-1px  rounded-xl flex items-center space-x-2 hover:(bg-gray-50 border-gray-300)">
@@ -69,7 +68,7 @@ function App() {
               />
             </Transitioner>
           </div>
-          <div className="flex items-center justify-end space-x-4">
+          <div className="flex items-center justify-end space-x-4 <md:(justify-center)">
             <button
               className={`px-3 h-40px border-1px rounded-xl flex items-center space-x-2 bg-white ${
                 state.current > 0
@@ -117,7 +116,7 @@ function App() {
           </div>
         </div>
       </div>
-      <div className="container mx-auto max-w-280 border-t-1px pt-4 pb-20 text-center">
+      <div className="container mx-auto max-w-280 border-t-1px pt-4 pb-10 text-center">
         Created by{" "}
         <a
           className="tracking-tighter underline hover:(underline-transparent)"

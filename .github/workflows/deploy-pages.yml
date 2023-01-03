@@ -43,7 +43,7 @@ jobs:
         run: yarn install --immutable
 
       - name: Build production files
-        run: yarn workspace easy-mesh-gradient build
+        run: yarn workspace pages build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
