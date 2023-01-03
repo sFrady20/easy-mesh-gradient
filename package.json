@@ -1,0 +1,12 @@
+{
+  "name": "easy-mesh-gradient-monorepo",
+  "packageManager": "yarn@3.3.1",
+  "workspaces": [
+    "lib",
+    "pages"
+  ],
+  "scripts": {
+    "dev": "yarn workspace pages dev",
+    "build": "yarn workspace easy-mesh-gradient build"
+  }
+}

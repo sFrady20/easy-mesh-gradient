@@ -1,0 +1,24 @@
+# Yarn zero-install stuff that doesn't need to be saved
+# https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.cjs
+# Logs
+*.log
+# Prevent package-lock files from competing with Yarn's lockfile
+# in-case someone runs npm i
+package-lock.json
+**/package-lock.json
+# Dependency directories
+node_modules/
+# Optional npm cache directory
+.npm
+# Yarn Integrity file
+.yarn-integrity
+# dotenv environment variables file
+.env
+dist
