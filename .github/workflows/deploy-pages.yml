@@ -1,0 +1,55 @@
+name: Deploy static content to Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "pages/**/*"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+
+      - name: Use Node.js 17.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 17.x
+
+      - name: Provide Yarn
+        run: corepack enable
+
+      - name: Install project dependencies
+        run: yarn install --immutable
+
+      - name: Build production files
+        run: yarn workspace easy-mesh-gradient build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: "./pages/dist"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1

@@ -5,9 +5,13 @@
   "files": [
     "dist"
   ],
+  "main": "dist/easy-mesh-gradient.umd.cjs",
+  "module": "dist/easy-mesh-gradient.js",
+  "types": "dist/index.d.ts",
   "devDependencies": {
     "@types/seedrandom": "^3.0.4",
-    "vite": "^4.0.3"
+    "vite": "^4.0.3",
+    "vite-plugin-dts": "^1.7.1"
   },
   "dependencies": {
     "seedrandom": "^3.0.5"
