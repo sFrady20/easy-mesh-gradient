@@ -10,7 +10,7 @@ function Transitioner(props: { seed: string; children?: ReactNode }) {
   }>({});
 
   useEffect(() => {
-    setEntries((entries) => {
+    setEntries(({ ...entries }) => {
       let entry = entries[seed];
 
       if (!entry) {
@@ -26,22 +26,27 @@ function Transitioner(props: { seed: string; children?: ReactNode }) {
         entries[seed] = entry;
       }
 
+      entry.controller.stop(true);
       entry.controller.start({ opacity: 1 });
 
       Object.keys(entries)
         .filter((x) => x !== seed)
         .forEach((y) => {
-          entries[y].controller.start({ opacity: 0 }).then(() => {
-            setEntries(({ ...x }) => {
-              delete x[y];
-              return x;
-            });
+          entries[y].controller.start({
+            opacity: 0,
+            onRest: ({ finished }) => {
+              if (!finished) return;
+              setEntries(({ ...x }) => {
+                delete x[y];
+                return x;
+              });
+            },
           });
         });
 
-      return { ...entries };
+      return entries;
     });
-  }, [seed, children]);
+  }, [seed, children, setEntries]);
 
   return <>{Object.values(entries).map((x) => x.child)}</>;
 }
