@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - "pages/**/*"
-      - "lib/package.json"
+      - pages/**/*
+      - lib/package.json
 
   workflow_dispatch:
 

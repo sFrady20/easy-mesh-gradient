@@ -21,7 +21,7 @@ yarn add easy-mesh-gradient
 ```tsx
 import easyMeshGradient from "easy-mesh-gradient";
 
-const mesh = easyMeshGradient();
+const gradientString = easyMeshGradient();
 
 document.body.style.backgroundImage = `${gradientString}`;
 ```
