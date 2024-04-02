@@ -16,15 +16,17 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: true
 
 jobs:
   deploy:
+    runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -37,14 +39,15 @@ jobs:
         with:
           node-version: 17.x
 
-      - name: Provide Yarn
-        run: corepack enable
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
 
       - name: Install project dependencies
-        run: yarn install --immutable
+        run: bun install --immutable
 
       - name: Build production files
-        run: yarn workspace pages build
+        run: bun run --cwd pages build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
