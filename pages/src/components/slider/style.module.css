@@ -1,0 +1,50 @@
+@property --value {
+  initial-value: 0;
+  syntax: "<number>";
+  inherits: true;
+}
+
+@keyframes progress {
+  to {
+    --value: 1;
+  }
+}
+
+.container {
+  @apply relative rounded-md overflow-hidden flex flex-row gap-4 items-center;
+
+  timeline-scope: --thumb;
+  animation: progress both linear;
+  animation-direction: reverse;
+  animation-timeline: --thumb;
+  animation-range: contain;
+
+  transition: transform 0.1s ease-out;
+}
+
+.container:active {
+  transform: scaleY(1.2);
+}
+
+.container:before {
+  @apply bg-gray-200 absolute inset-0 pointer-events-none overflow-hidden;
+  content: "";
+}
+.container:before:hover {
+  @apply bg-grat300/20;
+}
+.container::after {
+  @apply bg-gray-900 absolute left-0 top-0 h-full pointer-events-none rounded-l-md;
+  content: "";
+  width: calc(var(--value) * 100%);
+}
+
+.input {
+  @apply cursor-col-resize overflow-hidden opacity-0 flex-1 h-10;
+}
+.input::-webkit-slider-thumb {
+  view-timeline: --thumb inline;
+}
+.input:active {
+  @apply cursor-col-resize;
+}

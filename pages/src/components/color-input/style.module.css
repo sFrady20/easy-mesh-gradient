@@ -1,0 +1,7 @@
+.container {
+  @apply relative rounded-md overflow-hidden flex flex-row gap-4 items-center;
+}
+
+.input {
+  @apply overflow-hidden flex-1 h-10;
+}

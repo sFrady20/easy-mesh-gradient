@@ -7,11 +7,14 @@ const easyMeshGradient = (options?: GradientOptions) => {
 
   let points: Point[] = [];
   if (options && "points" in options) {
-    points = [...points];
+    points = [...options.points];
   } else {
     const { pointsGenerator = defaultPointsGenerator } = options || {};
     points = pointsGenerator(options);
   }
+
+  if (!points[0]) return ``;
+
   const bg = points[0];
 
   const image = `${points.map(

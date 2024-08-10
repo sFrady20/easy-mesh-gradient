@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), WindiCSS()],
   resolve: {
     alias: {
-      "easy-mesh-gradient": "../../lib/src/index.ts",
+      "easy-mesh-gradient": "../../../../lib/src/index.ts",
     },
   },
 });
