@@ -4,14 +4,25 @@ import { Slider } from "../../components/slider";
 import easyMeshGradient from "easy-mesh-gradient";
 import { GradientOptions, Point } from "easy-mesh-gradient/types";
 import { ColorInput } from "../../components/color-input";
+import { Cancel, Reorder } from "@mui/icons-material";
+import { ItemInterface, ReactSortable } from "react-sortablejs";
+import { useRef } from "react";
+
+function makeRandomPoint() {
+  return {
+    id: Math.random().toString(32).substring(7),
+    x: Math.random() * 0.9 + 0.05,
+    y: Math.random() * 0.9 + 0.05,
+    h: Math.random() * 360,
+    s: Math.random(),
+    l: Math.random(),
+    scale: Math.random() + 0.5,
+  };
+}
 
 const editorStore = create(
-  immer<GradientOptions & { points: Point[] }>((x) => ({
-    points: [
-      { x: 0.1, y: 0.1, h: 120, s: 0.8, l: 0.6, scale: 1 },
-      { x: 0.5, y: 0.5, h: 60, s: 0.7, l: 0.5, scale: 1.5 },
-      { x: 0.9, y: 0.9, h: 300, s: 0.6, l: 0.4, scale: 1 },
-    ],
+  immer<GradientOptions & { points: (Point & ItemInterface)[] }>((x) => ({
+    points: new Array(3).fill("").map((x) => makeRandomPoint()),
     easingStops: 20,
   }))
 );
@@ -56,21 +67,63 @@ export function hexToHsl(hex: string): [number, number, number] | undefined {
 
 export const EditorPage = function () {
   const state = editorStore();
+  const points = editorStore((x) => x.points);
 
   const gradient = easyMeshGradient(state);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="flex-1 flex flex-row gap-3 p-6">
       <div className="flex-1 flex flex-col">
         <div
-          className="rounded-2xl shadow-2xl shadow-gray-500 sticky top-6 h-[calc(100vh-48px)]"
+          className="relative rounded-2xl shadow-2xl shadow-gray-500 sticky top-6 h-[calc(100vh-48px)]"
           style={{ backgroundImage: `${gradient}` }}
-        />
+          ref={previewRef}
+        >
+          {points.map((point, i) => (
+            <div
+              className="absolute w-5 h-5 transform -translate-x-1/2 -translate-y-1/2 bg-[white] shadow rounded-full border hover:scale-[1.2] flex flex-col justify-center items-center"
+              style={{ left: `${point.x * 100}%`, top: `${point.y * 100}%` }}
+              key={point.id}
+              onDrag={(e) => {
+                if (!previewRef.current) return;
+                if (e.screenX === 0) return;
+
+                const parentBox = previewRef.current.getBoundingClientRect();
+
+                editorStore.setState((x) => {
+                  x.points[i].x = (e.clientX - parentBox.x) / parentBox.width;
+                  x.points[i].y = (e.clientY - parentBox.y) / parentBox.height;
+                });
+              }}
+            >
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{
+                  backgroundColor: hslToHex(
+                    point.h,
+                    point.s * 100,
+                    point.l * 100
+                  ),
+                }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="flex flex-col w-[320px] max-w-screen p-3 gap-4">
+      <ReactSortable
+        className="flex flex-col w-[320px] max-w-screen p-3 gap-4"
+        handle=".sortable-handle"
+        list={points.map((x) => ({ ...x }))}
+        setList={(newPoints) => {
+          editorStore.setState((x) => {
+            x.points = JSON.parse(JSON.stringify(newPoints));
+          });
+        }}
+      >
         {state.points.map((point, i) => {
           return (
-            <div className="flex flex-row gap-3">
+            <div key={point.id} className="flex flex-row gap-3">
               <ColorInput
                 value={hslToHex(point.h, point.s * 100, point.l * 100)}
                 onChange={(e) => {
@@ -85,6 +138,13 @@ export const EditorPage = function () {
               />
               <Slider
                 className="flex-1"
+                style={
+                  {
+                    ["--color"]: `hsl(${point.h.toFixed(1)},${(
+                      point.s * 100
+                    ).toFixed(1)}%,${Math.min(80, point.l * 100).toFixed(1)}%)`,
+                  } as any
+                }
                 min={0}
                 max={2}
                 step={0.01}
@@ -95,16 +155,41 @@ export const EditorPage = function () {
                   });
                 }}
               />
+              <div className="flex flex-row items-center">
+                <button className="p-2 hover:bg-gray-200 rounded-lg flex flex-col items-center justify-center sortable-handle">
+                  <Reorder />
+                </button>
+                <button
+                  className="p-2 hover:bg-gray-200 rounded-lg flex flex-col items-center justify-center"
+                  onClick={() => {
+                    editorStore.setState((x) => {
+                      x.points.splice(i, 1);
+                    });
+                  }}
+                >
+                  <Cancel />
+                </button>
+              </div>
             </div>
           );
         })}
+        <button
+          className="bg-black rounded-full text-white text-sm font-medium p-3"
+          onClick={() => {
+            editorStore.setState((x) => {
+              x.points.push(makeRandomPoint());
+            });
+          }}
+        >
+          Add Point
+        </button>
         <div className="flex flex-col gap-4">
           <code className="bg-gray-200 p-4">
             {JSON.stringify(state, null, "  ")}
           </code>
-          <code className="bg-gray-200 p-4">{gradient}</code>
+          {/* <code className="bg-gray-200 p-4">{gradient}</code> */}
         </div>
-      </div>
+      </ReactSortable>
     </div>
   );
 };

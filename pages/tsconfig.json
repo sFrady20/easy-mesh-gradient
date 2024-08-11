@@ -16,7 +16,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "easy-mesh-gradient/*": ["../lib/dist/*"]
+      "easy-mesh-gradient": ["../lib/src"],
+      "easy-mesh-gradient/*": ["../lib/src/*"]
     }
   },
   "include": ["src"]

@@ -20,6 +20,7 @@
   animation-range: contain;
 
   transition: transform 0.1s ease-out;
+  --color: black;
 }
 
 .container:active {
@@ -34,9 +35,10 @@
   @apply bg-grat300/20;
 }
 .container::after {
-  @apply bg-gray-900 absolute left-0 top-0 h-full pointer-events-none rounded-l-md;
+  @apply absolute left-0 top-0 h-full pointer-events-none rounded-l-md;
   content: "";
   width: calc(var(--value) * 100%);
+  background-color: var(--color);
 }
 
 .input {

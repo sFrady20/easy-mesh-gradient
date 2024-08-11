@@ -19,6 +19,7 @@
     "react-dom": "^18.2.0",
     "react-router": "^6.26.0",
     "react-router-dom": "^6.26.0",
+    "react-sortablejs": "^6.1.4",
     "zustand": "^4.5.4"
   },
   "devDependencies": {
