@@ -6,7 +6,7 @@ import { GradientOptions, Point } from "easy-mesh-gradient/types";
 import { ColorInput } from "../../components/color-input";
 import { Cancel, Reorder } from "@mui/icons-material";
 import { ItemInterface, ReactSortable } from "react-sortablejs";
-import { useRef } from "react";
+import { RefObject, useRef } from "react";
 
 function makeRandomPoint() {
   return {
@@ -65,6 +65,42 @@ export function hexToHsl(hex: string): [number, number, number] | undefined {
   return [h, s, l];
 }
 
+export const PointHandle = function (props: {
+  point: Point & ItemInterface;
+  previewRef: RefObject<HTMLDivElement>;
+  index: number;
+}) {
+  const { point, previewRef, index } = props;
+
+  const state = editorStore();
+
+  return (
+    <div
+      className="absolute w-5 h-5 transform -translate-x-1/2 -translate-y-1/2 bg-[white] shadow rounded-full border hover:scale-[1.2] flex flex-col justify-center items-center"
+      style={{ left: `${point.x * 100}%`, top: `${point.y * 100}%` }}
+      key={point.id}
+      onDrag={(e) => {
+        if (!previewRef.current) return;
+        if (e.screenX === 0) return;
+
+        const parentBox = previewRef.current.getBoundingClientRect();
+
+        editorStore.setState((x) => {
+          x.points[index].x = (e.clientX - parentBox.x) / parentBox.width;
+          x.points[index].y = (e.clientY - parentBox.y) / parentBox.height;
+        });
+      }}
+    >
+      <div
+        className="w-3 h-3 rounded-full"
+        style={{
+          backgroundColor: hslToHex(point.h, point.s * 100, point.l * 100),
+        }}
+      />
+    </div>
+  );
+};
+
 export const EditorPage = function () {
   const state = editorStore();
   const points = editorStore((x) => x.points);
@@ -81,33 +117,12 @@ export const EditorPage = function () {
           ref={previewRef}
         >
           {points.map((point, i) => (
-            <div
-              className="absolute w-5 h-5 transform -translate-x-1/2 -translate-y-1/2 bg-[white] shadow rounded-full border hover:scale-[1.2] flex flex-col justify-center items-center"
-              style={{ left: `${point.x * 100}%`, top: `${point.y * 100}%` }}
+            <PointHandle
               key={point.id}
-              onDrag={(e) => {
-                if (!previewRef.current) return;
-                if (e.screenX === 0) return;
-
-                const parentBox = previewRef.current.getBoundingClientRect();
-
-                editorStore.setState((x) => {
-                  x.points[i].x = (e.clientX - parentBox.x) / parentBox.width;
-                  x.points[i].y = (e.clientY - parentBox.y) / parentBox.height;
-                });
-              }}
-            >
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{
-                  backgroundColor: hslToHex(
-                    point.h,
-                    point.s * 100,
-                    point.l * 100
-                  ),
-                }}
-              />
-            </div>
+              point={point}
+              previewRef={previewRef}
+              index={i}
+            />
           ))}
         </div>
       </div>
