@@ -21,4 +21,29 @@ node_modules/
 .yarn-integrity
 # dotenv environment variables file
 .env
+.env.local
+.env.*.local
+
+# Build outputs
 **/dist
+**/build
+**/.vite
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Testing
+coverage
+*.lcov
+
+# Misc
+*.tsbuildinfo
+.cache

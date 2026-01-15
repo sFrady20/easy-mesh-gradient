@@ -1,14 +1,19 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Source+Code+Pro&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-body {
-  @apply flex flex-col bg-gray-100 min-h-screen;
-  font-family: "Inter", sans-serif;
-}
+@layer base {
+  body {
+    @apply flex flex-col bg-gray-100 min-h-screen;
+    font-family: "Inter", sans-serif;
+  }
 
-#root {
-  @apply flex-1 flex flex-col;
-}
+  #root {
+    @apply flex-1 flex flex-col;
+  }
 
-code {
-  font-family: "Source Code Pro", monospace;
+  code {
+    font-family: "Source Code Pro", monospace;
+  }
 }

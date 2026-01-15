@@ -32,7 +32,7 @@
   content: "";
 }
 .container:before:hover {
-  @apply bg-grat300/20;
+  @apply bg-gray-300/20;
 }
 .container::after {
   @apply absolute left-0 top-0 h-full pointer-events-none rounded-l-md;

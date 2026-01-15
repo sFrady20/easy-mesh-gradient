@@ -1,4 +1,8 @@
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from "react";
+import {
+  type ComponentPropsWithoutRef,
+  type ElementRef,
+  forwardRef,
+} from "react";
 import styles from "./style.module.css";
 
 export const ColorInput = forwardRef<

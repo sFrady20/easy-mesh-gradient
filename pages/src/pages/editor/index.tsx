@@ -2,11 +2,11 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { Slider } from "../../components/slider";
 import easyMeshGradient from "easy-mesh-gradient";
-import { GradientOptions, Point } from "easy-mesh-gradient/types";
+import type { GradientOptions, Point } from "easy-mesh-gradient/types";
 import { ColorInput } from "../../components/color-input";
 import { Cancel, Reorder } from "@mui/icons-material";
-import { ItemInterface, ReactSortable } from "react-sortablejs";
-import { RefObject, useRef } from "react";
+import { type ItemInterface, ReactSortable } from "react-sortablejs";
+import { type RefObject, useRef } from "react";
 
 function makeRandomPoint() {
   return {

@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useState } from "react";
 import { animated, Controller } from "@react-spring/web";
 

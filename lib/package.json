@@ -1,14 +1,56 @@
 {
   "name": "easy-mesh-gradient",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "files": [
     "dist"
   ],
-  "main": "dist/easy-mesh-gradient.umd.cjs",
-  "module": "dist/easy-mesh-gradient.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/easy-mesh-gradient.umd.cjs",
+  "module": "./dist/easy-mesh-gradient.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/easy-mesh-gradient.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/easy-mesh-gradient.umd.cjs"
+      },
+      "development": "./src/index.ts"
+    },
+    "./types": {
+      "import": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.d.ts"
+      },
+      "development": "./src/types.ts"
+    },
+    "./easings": {
+      "import": {
+        "types": "./dist/easings.d.ts",
+        "default": "./dist/easings.d.ts"
+      },
+      "development": "./src/easings.ts"
+    },
+    "./generators": {
+      "import": {
+        "types": "./dist/generators.d.ts",
+        "default": "./dist/generators.d.ts"
+      },
+      "development": "./src/generators.ts"
+    },
+    "./validation": {
+      "import": {
+        "types": "./dist/validation.d.ts",
+        "default": "./dist/validation.d.ts"
+      },
+      "development": "./src/validation.ts"
+    }
+  },
+  "sideEffects": false,
   "homepage": "easy-mesh-gradient.stevenfrady.com",
   "author": {
     "name": "Steven Frady",
@@ -16,18 +58,16 @@
     "url": "https://stevenfrady.com"
   },
   "repository": {
-    "url": "https://github.com/sFrady20/easy-mesh-gradient"
+    "type": "git",
+    "url": "https://github.com/sFrady20/easy-mesh-gradient.git"
   },
   "bugs": {
     "url": "https://github.com/sFrady20/easy-mesh-gradient/issues"
   },
   "devDependencies": {
-    "@types/seedrandom": "^3.0.4",
-    "vite": "^4.0.3",
-    "vite-plugin-dts": "^1.7.1"
-  },
-  "dependencies": {
-    "seedrandom": "^3.0.5"
+    "typescript": "^5.6.3",
+    "vite": "^5.4.2",
+    "vite-plugin-dts": "^3.9.1"
   },
   "scripts": {
     "build": "vite build"
