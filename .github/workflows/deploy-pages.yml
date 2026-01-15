@@ -45,7 +45,7 @@ jobs:
           bun-version: latest
 
       - name: Install project dependencies
-        run: bun install --frozen-lockfile
+        run: bun install
 
       - name: Build production files
         run: bun run --cwd pages build
