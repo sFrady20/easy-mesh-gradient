@@ -14,7 +14,7 @@ import easyMeshGradient, {
 } from "easy-mesh-gradient";
 import type { Point } from "easy-mesh-gradient/types";
 import { ColorInput } from "../../components/color-input";
-import { Cancel, Reorder } from "@mui/icons-material";
+import { Cancel, Reorder, Casino } from "@mui/icons-material";
 import { type ItemInterface, ReactSortable } from "react-sortablejs";
 import { type RefObject, useRef, useState, useMemo } from "react";
 import { Card, CopyButton } from "../../components/ui";
@@ -233,7 +233,7 @@ export const EditorPage = function () {
   return (
     <div className="flex-1 flex flex-col lg:flex-row gap-6 p-6 bg-gray-50 min-h-[calc(100vh-64px)]">
       {/* Preview */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col gap-4">
         <div
           className="relative rounded-2xl shadow-xl flex-1 min-h-[400px]"
           style={{ backgroundImage: gradient }}
@@ -247,6 +247,19 @@ export const EditorPage = function () {
               index={i}
             />
           ))}
+        </div>
+        <div className="flex justify-center">
+          <button
+            onClick={() => {
+              editorStore.setState((x) => {
+                x.points = new Array(4).fill("").map(() => makeRandomPoint());
+              });
+            }}
+            className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-xl font-medium text-sm hover:bg-gray-800 transition-colors"
+          >
+            <Casino style={{ fontSize: 18 }} />
+            Randomize
+          </button>
         </div>
       </div>
 

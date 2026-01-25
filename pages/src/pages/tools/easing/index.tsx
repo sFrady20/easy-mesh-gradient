@@ -11,7 +11,8 @@ import {
   easeInOutExpo,
 } from "easy-mesh-gradient";
 import easyMeshGradient from "easy-mesh-gradient";
-import { Card, CodeBlock } from "../../../components/ui";
+import { Card, CodeBlock, Button } from "../../../components/ui";
+import CasinoIcon from "@mui/icons-material/CasinoOutlined";
 
 type EasingFunction = (x: number) => number;
 
@@ -71,10 +72,10 @@ function AnimatedBall({ fn, progress }: { fn: EasingFunction; progress: number }
   const easedProgress = fn(progress);
 
   return (
-    <div className="relative h-16 bg-gray-100 rounded-lg overflow-hidden">
+    <div className="relative h-12 bg-gray-100 rounded-lg overflow-hidden">
       <div
-        className="absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-gray-900 rounded-full shadow-lg transition-none"
-        style={{ left: `calc(${easedProgress * 100}% - 16px)` }}
+        className="absolute top-1/2 -translate-y-1/2 w-6 h-6 bg-gray-900 rounded-full shadow-lg transition-none"
+        style={{ left: `calc(${easedProgress * 100}% - 12px)` }}
       />
     </div>
   );
@@ -82,6 +83,7 @@ function AnimatedBall({ fn, progress }: { fn: EasingFunction; progress: number }
 
 export function EasingVisualizerPage() {
   const [selected, setSelected] = useState("easeInOutCubic");
+  const [seed, setSeed] = useState("easing-demo");
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -91,9 +93,13 @@ export function EasingVisualizerPage() {
   );
 
   const gradient = useMemo(
-    () => easyMeshGradient({ seed: "easing-demo", easing: selectedFn }),
-    [selectedFn]
+    () => easyMeshGradient({ seed, easing: selectedFn }),
+    [seed, selectedFn]
   );
+
+  const randomize = () => {
+    setSeed((Math.random() + 1).toString(36));
+  };
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -131,7 +137,7 @@ const gradient = easyMeshGradient({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2">
           <Card>
             <h2 className="text-lg font-medium text-gray-900 mb-4">
               Easing Functions
@@ -169,22 +175,16 @@ const gradient = easyMeshGradient({
               ))}
             </div>
           </Card>
+        </div>
 
+        <div className="space-y-6">
+          {/* Animation Preview - moved to right column */}
           <Card>
             <h2 className="text-lg font-medium text-gray-900 mb-4">
               Animation Preview
             </h2>
             <AnimatedBall fn={selectedFn} progress={progress} />
-            <div className="mt-4 flex items-center gap-4">
-              <button
-                onClick={() => {
-                  setProgress(0);
-                  setIsPlaying(true);
-                }}
-                className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                Play Animation
-              </button>
+            <div className="mt-4 space-y-3">
               <input
                 type="range"
                 min="0"
@@ -195,17 +195,29 @@ const gradient = easyMeshGradient({
                   setIsPlaying(false);
                   setProgress(parseFloat(e.target.value));
                 }}
-                className="flex-1"
+                className="w-full"
               />
+              <button
+                onClick={() => {
+                  setProgress(0);
+                  setIsPlaying(true);
+                }}
+                className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+              >
+                Play Animation
+              </button>
             </div>
           </Card>
-        </div>
 
-        <div className="space-y-6">
           <Card>
-            <h2 className="text-lg font-medium text-gray-900 mb-4">
-              Gradient Preview
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-medium text-gray-900">
+                Gradient Preview
+              </h2>
+              <Button variant="ghost" onClick={randomize} className="!p-2">
+                <CasinoIcon style={{ fontSize: 18 }} />
+              </Button>
+            </div>
             <div
               className="aspect-square rounded-xl shadow-lg"
               style={{ backgroundImage: gradient }}
