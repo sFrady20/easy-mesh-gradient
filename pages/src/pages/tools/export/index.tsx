@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback, useMemo } from "react";
-import easyMeshGradient from "easy-mesh-gradient";
+import { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import easyMeshGradient, { defaultPointsGenerator, easeInOutCubic } from "easy-mesh-gradient";
+import type { Point } from "easy-mesh-gradient/types";
 import { Card, Button } from "../../../components/ui";
 import CasinoIcon from "@mui/icons-material/CasinoOutlined";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -14,6 +15,56 @@ const sizePresets = [
   { name: "Custom", width: 0, height: 0 },
 ];
 
+// Convert HSL to RGB for canvas
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    return l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+  };
+  return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+}
+
+// Draw gradient on canvas using the same algorithm as the library
+function drawGradientOnCanvas(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  points: Point[],
+  easingStops: number = 10
+) {
+  if (points.length === 0) return;
+
+  // Draw base color from first point
+  const basePoint = points[0];
+  const baseRgb = hslToRgb(basePoint.h, basePoint.s, basePoint.l);
+  ctx.fillStyle = `rgb(${baseRgb.join(",")})`;
+  ctx.fillRect(0, 0, width, height);
+
+  // Draw each point as a radial gradient (in reverse order, last on top)
+  for (let i = points.length - 1; i >= 0; i--) {
+    const point = points[i];
+    const x = point.x * width;
+    const y = point.y * height;
+    const maxDim = Math.max(width, height);
+    const radius = maxDim * point.scale;
+
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+
+    // Generate color stops with easing
+    for (let j = 0; j <= easingStops; j++) {
+      const t = j / easingStops;
+      const easedT = easeInOutCubic(t);
+      const alpha = 1 - easedT;
+      const rgb = hslToRgb(point.h, point.s, point.l);
+      gradient.addColorStop(t, `rgba(${rgb.join(",")},${alpha})`);
+    }
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+  }
+}
+
 export function GradientExportPage() {
   const [seed, setSeed] = useState("export-demo");
   const [selectedPreset, setSelectedPreset] = useState(0);
@@ -21,59 +72,77 @@ export function GradientExportPage() {
   const [customHeight, setCustomHeight] = useState(1080);
   const [format, setFormat] = useState<"png" | "jpeg">("png");
   const [isExporting, setIsExporting] = useState(false);
-  const previewRef = useRef<HTMLDivElement>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(600);
 
   const preset = sizePresets[selectedPreset];
   const width = preset.name === "Custom" ? customWidth : preset.width;
   const height = preset.name === "Custom" ? customHeight : preset.height;
 
+  // Generate points from seed
+  const points = useMemo(
+    () => defaultPointsGenerator({ seed, pointCount: 5 }),
+    [seed]
+  );
+
+  // CSS gradient for preview (used as fallback/reference)
   const gradient = useMemo(() => easyMeshGradient({ seed }), [seed]);
 
   const randomize = () => {
     setSeed((Math.random() + 1).toString(36));
   };
 
+  // Track container width for responsive preview
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.clientWidth - 48); // minus padding
+      }
+    };
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
+  // Calculate preview dimensions that maintain aspect ratio
+  const aspectRatio = width / height;
+  const maxPreviewHeight = 400;
+
+  let previewWidth: number;
+  let previewHeight: number;
+
+  if (aspectRatio > containerWidth / maxPreviewHeight) {
+    // Width constrained
+    previewWidth = containerWidth;
+    previewHeight = containerWidth / aspectRatio;
+  } else {
+    // Height constrained
+    previewHeight = maxPreviewHeight;
+    previewWidth = maxPreviewHeight * aspectRatio;
+  }
+
+  // Draw preview canvas
+  useEffect(() => {
+    const canvas = previewCanvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Set canvas size to preview size (for display)
+    canvas.width = previewWidth * window.devicePixelRatio;
+    canvas.height = previewHeight * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+    drawGradientOnCanvas(ctx, previewWidth, previewHeight, points, 15);
+  }, [points, previewWidth, previewHeight]);
+
   const download = useCallback(async () => {
     setIsExporting(true);
 
     try {
-      // Create an SVG with foreignObject containing the gradient div
-      const svgNS = "http://www.w3.org/2000/svg";
-      const svg = document.createElementNS(svgNS, "svg");
-      svg.setAttribute("width", String(width));
-      svg.setAttribute("height", String(height));
-      svg.setAttribute("xmlns", svgNS);
-
-      const foreignObject = document.createElementNS(svgNS, "foreignObject");
-      foreignObject.setAttribute("width", "100%");
-      foreignObject.setAttribute("height", "100%");
-
-      const div = document.createElement("div");
-      div.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
-      div.style.width = "100%";
-      div.style.height = "100%";
-      div.style.backgroundImage = gradient;
-
-      foreignObject.appendChild(div);
-      svg.appendChild(foreignObject);
-
-      // Serialize SVG to string
-      const serializer = new XMLSerializer();
-      const svgString = serializer.serializeToString(svg);
-      const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-      const svgUrl = URL.createObjectURL(svgBlob);
-
-      // Create image from SVG
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = reject;
-        img.src = svgUrl;
-      });
-
-      // Draw to canvas
+      // Create a full-resolution canvas for export
       const canvas = document.createElement("canvas");
       canvas.width = width;
       canvas.height = height;
@@ -89,10 +158,8 @@ export function GradientExportPage() {
         ctx.fillRect(0, 0, width, height);
       }
 
-      ctx.drawImage(img, 0, 0, width, height);
-
-      // Clean up SVG URL
-      URL.revokeObjectURL(svgUrl);
+      // Draw the gradient at full resolution
+      drawGradientOnCanvas(ctx, width, height, points, 20);
 
       // Download
       const mimeType = format === "png" ? "image/png" : "image/jpeg";
@@ -100,7 +167,10 @@ export function GradientExportPage() {
 
       canvas.toBlob(
         (blob) => {
-          if (!blob) return;
+          if (!blob) {
+            setIsExporting(false);
+            return;
+          }
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.download = `gradient-${seed}.${format}`;
@@ -116,25 +186,7 @@ export function GradientExportPage() {
       console.error("Export failed:", error);
       setIsExporting(false);
     }
-  }, [width, height, gradient, seed, format]);
-
-  // Calculate preview dimensions that fit within the container while maintaining aspect ratio
-  const previewMaxWidth = 600;
-  const previewMaxHeight = 400;
-  const aspectRatio = width / height;
-
-  let previewWidth: number;
-  let previewHeight: number;
-
-  if (aspectRatio > previewMaxWidth / previewMaxHeight) {
-    // Width constrained
-    previewWidth = Math.min(previewMaxWidth, width);
-    previewHeight = previewWidth / aspectRatio;
-  } else {
-    // Height constrained
-    previewHeight = Math.min(previewMaxHeight, height);
-    previewWidth = previewHeight * aspectRatio;
-  }
+  }, [width, height, points, seed, format]);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
@@ -151,12 +203,15 @@ export function GradientExportPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <Card>
-            <div className="bg-gray-100 rounded-xl p-6 flex items-center justify-center min-h-[450px]">
-              <div
-                ref={previewRef}
+            <div
+              ref={containerRef}
+              className="bg-gray-100 rounded-xl p-6 flex items-center justify-center"
+              style={{ minHeight: Math.min(maxPreviewHeight + 48, previewHeight + 48) }}
+            >
+              <canvas
+                ref={previewCanvasRef}
                 className="rounded-lg shadow-xl"
                 style={{
-                  backgroundImage: gradient,
                   width: previewWidth,
                   height: previewHeight,
                 }}
