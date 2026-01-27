@@ -2,7 +2,8 @@
   "name": "easy-mesh-gradient-monorepo",
   "workspaces": [
     "lib",
-    "pages"
+    "pages",
+    "promo"
   ],
   "scripts": {
     "dev": "bun --cwd pages dev",
