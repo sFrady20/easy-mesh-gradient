@@ -1,5 +1,6 @@
 {
   "name": "easy-mesh-gradient-monorepo",
+  "private": true,
   "workspaces": [
     "lib",
     "pages",
@@ -8,17 +9,17 @@
   "scripts": {
     "dev": "bun --cwd pages dev",
     "build": "bun --cwd lib build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "build:pages": "bun --cwd pages build",
+    "lint": "eslint lib pages",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
-    "type-check": "tsc --noEmit"
+    "type-check": "bun --cwd lib type-check && bun --cwd pages type-check"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react": "^7.37.0",
-    "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-react-refresh": "^0.4.11",
-    "prettier": "^3.3.3"
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "prettier": "^3.9.5",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.64.0"
   }
 }

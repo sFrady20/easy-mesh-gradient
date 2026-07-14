@@ -1,15 +1,7 @@
-/**
- * Collection of easing functions for gradient transitions.
- * All functions accept a value between 0 and 1 and return a value between 0 and 1.
- *
- * @public
- */
+import type { EasingFunction } from "./types";
 
 /**
  * Linear easing - no acceleration or deceleration.
- *
- * @param x - Input value between 0 and 1
- * @returns Output value between 0 and 1
  * @public
  */
 export function linear(x: number): number {
@@ -18,9 +10,6 @@ export function linear(x: number): number {
 
 /**
  * Ease in quadratic - slow start, accelerating.
- *
- * @param x - Input value between 0 and 1
- * @returns Output value between 0 and 1
  * @public
  */
 export function easeInQuad(x: number): number {
@@ -29,9 +18,6 @@ export function easeInQuad(x: number): number {
 
 /**
  * Ease out quadratic - fast start, decelerating.
- *
- * @param x - Input value between 0 and 1
- * @returns Output value between 0 and 1
  * @public
  */
 export function easeOutQuad(x: number): number {
@@ -40,9 +26,6 @@ export function easeOutQuad(x: number): number {
 
 /**
  * Ease in-out quadratic - slow start and end, fast middle.
- *
- * @param x - Input value between 0 and 1
- * @returns Output value between 0 and 1
  * @public
  */
 export function easeInOutQuad(x: number): number {
@@ -51,9 +34,6 @@ export function easeInOutQuad(x: number): number {
 
 /**
  * Ease in cubic - slow start, accelerating.
- *
- * @param x - Input value between 0 and 1
- * @returns Output value between 0 and 1
  * @public
  */
 export function easeInCubic(x: number): number {
@@ -62,9 +42,6 @@ export function easeInCubic(x: number): number {
 
 /**
  * Ease out cubic - fast start, decelerating.
- *
- * @param x - Input value between 0 and 1
- * @returns Output value between 0 and 1
  * @public
  */
 export function easeOutCubic(x: number): number {
@@ -74,9 +51,6 @@ export function easeOutCubic(x: number): number {
 /**
  * Ease in-out cubic - slow start and end, fast middle.
  * This is the default easing function.
- *
- * @param x - Input value between 0 and 1
- * @returns Output value between 0 and 1
  * @public
  */
 export function easeInOutCubic(x: number): number {
@@ -85,9 +59,6 @@ export function easeInOutCubic(x: number): number {
 
 /**
  * Ease in-out sine - smooth, natural motion.
- *
- * @param x - Input value between 0 and 1
- * @returns Output value between 0 and 1
  * @public
  */
 export function easeInOutSine(x: number): number {
@@ -96,9 +67,6 @@ export function easeInOutSine(x: number): number {
 
 /**
  * Ease in-out exponential - very smooth, dramatic transitions.
- *
- * @param x - Input value between 0 and 1
- * @returns Output value between 0 and 1
  * @public
  */
 export function easeInOutExpo(x: number): number {
@@ -110,3 +78,28 @@ export function easeInOutExpo(x: number): number {
         ? Math.pow(2, 20 * x - 10) / 2
         : (2 - Math.pow(2, -20 * x + 10)) / 2;
 }
+
+/**
+ * All built-in easing functions, keyed by name.
+ * Useful for building pickers or looking up an easing from a string.
+ *
+ * @public
+ */
+export const easings = {
+  linear,
+  easeInQuad,
+  easeOutQuad,
+  easeInOutQuad,
+  easeInCubic,
+  easeOutCubic,
+  easeInOutCubic,
+  easeInOutSine,
+  easeInOutExpo,
+} satisfies Record<string, EasingFunction>;
+
+/**
+ * Name of a built-in easing function.
+ *
+ * @public
+ */
+export type EasingName = keyof typeof easings;

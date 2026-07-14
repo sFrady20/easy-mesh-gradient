@@ -1,6 +1,7 @@
 {
   "name": "easy-mesh-gradient",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "description": "Generate beautiful CSS mesh gradients with easing. Zero dependencies, full TypeScript support.",
   "type": "module",
   "license": "MIT",
   "files": [
@@ -18,40 +19,20 @@
       "require": {
         "types": "./dist/index.d.ts",
         "default": "./dist/easy-mesh-gradient.umd.cjs"
-      },
-      "development": "./src/index.ts"
-    },
-    "./types": {
-      "import": {
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.d.ts"
-      },
-      "development": "./src/types.ts"
-    },
-    "./easings": {
-      "import": {
-        "types": "./dist/easings.d.ts",
-        "default": "./dist/easings.d.ts"
-      },
-      "development": "./src/easings.ts"
-    },
-    "./generators": {
-      "import": {
-        "types": "./dist/generators.d.ts",
-        "default": "./dist/generators.d.ts"
-      },
-      "development": "./src/generators.ts"
-    },
-    "./validation": {
-      "import": {
-        "types": "./dist/validation.d.ts",
-        "default": "./dist/validation.d.ts"
-      },
-      "development": "./src/validation.ts"
+      }
     }
   },
   "sideEffects": false,
-  "homepage": "easy-mesh-gradient.stevenfrady.com",
+  "keywords": [
+    "mesh-gradient",
+    "gradient",
+    "css",
+    "background",
+    "generative",
+    "color",
+    "typescript"
+  ],
+  "homepage": "https://easy-mesh-gradient.stevenfrady.com",
   "author": {
     "name": "Steven Frady",
     "email": "sfrady20@gmail.com",
@@ -59,17 +40,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sFrady20/easy-mesh-gradient.git"
+    "url": "https://github.com/sFrady20/easy-mesh-gradient.git",
+    "directory": "lib"
   },
   "bugs": {
     "url": "https://github.com/sFrady20/easy-mesh-gradient/issues"
   },
   "devDependencies": {
-    "typescript": "^5.6.3",
-    "vite": "^5.4.2",
-    "vite-plugin-dts": "^3.9.1"
+    "typescript": "~5.9.3",
+    "vite": "^8.1.4",
+    "vite-plugin-dts": "^5.0.3"
   },
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "type-check": "tsc --noEmit"
   }
 }

@@ -1,12 +1,21 @@
 import type { Point, PointGenerationOptions } from "./types";
 
-/**
- * Validates that a number is within a given range.
- *
- * @internal
- */
+/** @internal */
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+/** @internal */
+function normalizeRange(
+  range: unknown,
+  fallback: [number, number],
+  min: number,
+  max: number
+): [number, number] {
+  if (!Array.isArray(range)) return fallback;
+  const lo = clamp(Number(range[0] ?? fallback[0]), min, max);
+  const hi = clamp(Number(range[1] ?? fallback[1]), min, max);
+  return lo <= hi ? [lo, hi] : [hi, lo];
 }
 
 /**
@@ -36,14 +45,15 @@ export function validatePoint(point: Partial<Point>): Point {
  * @public
  */
 export function validatePoints(points: Partial<Point>[]): Point[] {
-  if (!Array.isArray(points) || points.length === 0) {
-    return [];
-  }
+  if (!Array.isArray(points)) return [];
   return points.map(validatePoint);
 }
 
 /**
  * Validates point generation options and returns normalized values.
+ *
+ * The hue range is intentionally not reordered: [300, 60] wraps
+ * around the color wheel.
  *
  * @param options - Options to validate
  * @returns Normalized options with valid ranges
@@ -52,51 +62,18 @@ export function validatePoints(points: Partial<Point>[]): Point[] {
 export function validateGenerationOptions(
   options?: PointGenerationOptions
 ): Required<Omit<PointGenerationOptions, "seed" | "pointsGenerator">> {
-  const pointCount = Math.max(1, Math.floor(Number(options?.pointCount ?? 5)));
-
-  const scaleRange: [number, number] = Array.isArray(options?.scaleRange)
-    ? [
-        Math.max(0.1, options.scaleRange[0] ?? 0.5),
-        Math.max(0.1, options.scaleRange[1] ?? 2),
-      ]
-    : [0.5, 2];
-
   const hueRange: [number, number] = Array.isArray(options?.hueRange)
     ? [
-        clamp(options.hueRange[0] ?? 0, 0, 360),
-        clamp(options.hueRange[1] ?? 360, 0, 360),
+        clamp(Number(options.hueRange[0] ?? 0), 0, 360),
+        clamp(Number(options.hueRange[1] ?? 360), 0, 360),
       ]
     : [0, 360];
 
-  const saturationRange: [number, number] = Array.isArray(
-    options?.saturationRange
-  )
-    ? [
-        clamp(options.saturationRange[0] ?? 0.5, 0, 1),
-        clamp(options.saturationRange[1] ?? 1, 0, 1),
-      ]
-    : [0.5, 1];
-
-  const lightnessRange: [number, number] = Array.isArray(
-    options?.lightnessRange
-  )
-    ? [
-        clamp(options.lightnessRange[0] ?? 0.5, 0, 1),
-        clamp(options.lightnessRange[1] ?? 1, 0, 1),
-      ]
-    : [0.5, 1];
-
   return {
-    pointCount,
-    scaleRange: scaleRange[0] <= scaleRange[1] ? scaleRange : [scaleRange[1], scaleRange[0]],
-    hueRange: hueRange[0] <= hueRange[1] ? hueRange : [hueRange[1], hueRange[0]],
-    saturationRange:
-      saturationRange[0] <= saturationRange[1]
-        ? saturationRange
-        : [saturationRange[1], saturationRange[0]],
-    lightnessRange:
-      lightnessRange[0] <= lightnessRange[1]
-        ? lightnessRange
-        : [lightnessRange[1], lightnessRange[0]],
+    pointCount: Math.max(1, Math.floor(Number(options?.pointCount ?? 5))),
+    scaleRange: normalizeRange(options?.scaleRange, [0.5, 2], 0.1, Infinity),
+    hueRange,
+    saturationRange: normalizeRange(options?.saturationRange, [0.5, 1], 0, 1),
+    lightnessRange: normalizeRange(options?.lightnessRange, [0.5, 1], 0, 1),
   };
 }

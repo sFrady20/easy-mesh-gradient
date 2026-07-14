@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pages",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["--cwd", "pages", "dev"],
+      "port": 5173
+    }
+  ]
+}

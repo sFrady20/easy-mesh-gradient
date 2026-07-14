@@ -1,0 +1,52 @@
+name: Publish to npm
+
+# Publishes the lib package when a GitHub release is published.
+# Auth uses npm trusted publishing (OIDC) — this repo + workflow file must be
+# configured as a trusted publisher for the package on npmjs.com:
+# https://docs.npmjs.com/trusted-publishers
+on:
+  release:
+    types: [published]
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Required for the OIDC token exchange and provenance
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      # Trusted publishing requires npm 11.5.1+
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Type-check
+        run: bun run --cwd lib type-check
+
+      - name: Build
+        run: bun run --cwd lib build
+
+      # Provenance is generated automatically via trusted publishing
+      - name: Publish
+        run: npm publish --access public
+        working-directory: lib

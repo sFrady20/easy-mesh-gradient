@@ -19,6 +19,13 @@ export type Point = {
 };
 
 /**
+ * Easing function type that maps [0, 1] to [0, 1].
+ *
+ * @public
+ */
+export type EasingFunction = (x: number) => number;
+
+/**
  * Options for controlling easing behavior in gradient transitions.
  *
  * @public
@@ -29,7 +36,7 @@ export type EasingOptions = {
    * Accepts a value between 0 and 1, returns a value between 0 and 1.
    * @default easeInOutCubic
    */
-  easing?: (x: number) => number;
+  easing?: EasingFunction;
   /**
    * Number of intermediate color stops in the gradient transitions.
    * Higher values create smoother gradients but increase CSS size.
@@ -63,6 +70,7 @@ export type PointGenerationOptions = {
   scaleRange?: [number, number];
   /**
    * Range [min, max] for the hue property of generated points (0-360).
+   * A range where min > max wraps around the color wheel (e.g. [300, 60]).
    * @default [0, 360]
    */
   hueRange?: [number, number];
@@ -91,10 +99,3 @@ export type PointGenerationOptions = {
  */
 export type GradientOptions = EasingOptions &
   ({ points: Point[] } | PointGenerationOptions);
-
-/**
- * Easing function type that maps [0, 1] to [0, 1].
- *
- * @public
- */
-export type EasingFunction = (x: number) => number;

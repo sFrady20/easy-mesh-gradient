@@ -17,9 +17,8 @@
     "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
     "paths": {
-      "easy-mesh-gradient": ["../lib/src"],
-      "easy-mesh-gradient/*": ["../lib/src/*"]
+      "easy-mesh-gradient": ["../lib/src/index.ts"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "vite.config.ts"]
 }

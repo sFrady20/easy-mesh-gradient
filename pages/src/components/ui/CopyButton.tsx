@@ -1,6 +1,5 @@
 import { useState } from "react";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import CheckIcon from "@mui/icons-material/Check";
+import { CheckIcon, CopyIcon } from "../icons";
 
 interface CopyButtonProps {
   text: string;
@@ -36,17 +35,8 @@ export function CopyButton({ text, className = "" }: CopyButtonProps) {
       `}
       aria-label={copied ? "Copied!" : "Copy to clipboard"}
     >
-      {copied ? (
-        <>
-          <CheckIcon style={{ fontSize: 16 }} />
-          <span>Copied</span>
-        </>
-      ) : (
-        <>
-          <ContentCopyIcon style={{ fontSize: 16 }} />
-          <span>Copy</span>
-        </>
-      )}
+      {copied ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
+      <span>{copied ? "Copied" : "Copy"}</span>
     </button>
   );
 }

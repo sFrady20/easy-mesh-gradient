@@ -5,7 +5,9 @@ on:
     branches:
       - main
     paths:
+      # The site bundles the library from source, so lib changes affect it too
       - pages/**/*
+      - lib/src/**/*
       - lib/package.json
 
   workflow_dispatch:
@@ -33,11 +35,6 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2

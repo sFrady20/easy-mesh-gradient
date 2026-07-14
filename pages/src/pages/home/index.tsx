@@ -1,73 +1,46 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router";
 import easyMeshGradient from "easy-mesh-gradient";
-import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
-import Transitioner from "../../components/Transitioner";
-import { Card, Button, CodeBlock } from "../../components/ui";
-import CasinoIcon from "@mui/icons-material/CasinoOutlined";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import CodeIcon from "@mui/icons-material/Code";
-import SpeedIcon from "@mui/icons-material/Speed";
-import TuneIcon from "@mui/icons-material/Tune";
-import GridViewIcon from "@mui/icons-material/GridView";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import SyncIcon from "@mui/icons-material/Sync";
+import { Button, Card, CodeBlock } from "../../components/ui";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CheckIcon,
+  CopyIcon,
+  ShuffleIcon,
+} from "../../components/icons";
 import libPkg from "../../../../lib/package.json";
 
 const features = [
   {
-    icon: CodeIcon,
-    title: "Zero Dependencies",
-    description: "Lightweight library with no external dependencies for minimal bundle size.",
+    title: "Zero dependencies",
+    description:
+      "Pure CSS output from a tiny library — nothing else ships with your bundle.",
   },
   {
-    icon: SpeedIcon,
-    title: "TypeScript Support",
-    description: "Full type definitions for great developer experience and code completion.",
+    title: "Eased color falloff",
+    description:
+      "Nine built-in easing curves shape how each color fades, from linear to exponential.",
   },
   {
-    icon: TuneIcon,
-    title: "9 Easing Functions",
-    description: "Built-in easing options from linear to exponential for smooth transitions.",
+    title: "Seeded generation",
+    description:
+      "The same seed always produces the same gradient, so results are reproducible.",
   },
   {
-    icon: SyncIcon,
-    title: "Seeded Generation",
-    description: "Reproducible gradients with seed-based random generation.",
+    title: "Full TypeScript support",
+    description:
+      "Complete type definitions for every option, point, and helper.",
   },
   {
-    icon: GridViewIcon,
-    title: "Grid Generator",
-    description: "Create structured patterns with the grid-based point generator.",
+    title: "Image rendering",
+    description:
+      "Render the exact same gradient to a canvas and export it as PNG or JPEG.",
   },
   {
-    icon: CheckCircleIcon,
-    title: "Input Validation",
-    description: "Automatic value clamping and normalization for safe usage.",
-  },
-];
-
-const tools = [
-  {
-    path: "/editor",
-    title: "Gradient Editor",
-    description: "Create custom gradients visually with drag-and-drop points.",
-  },
-  {
-    path: "/tools/easing",
-    title: "Easing Visualizer",
-    description: "Explore and compare all available easing functions.",
-  },
-  {
-    path: "/tools/export",
-    title: "Image Export",
-    description: "Download gradients as PNG or JPEG images.",
-  },
-  {
-    path: "/tools/palette",
-    title: "Color Palette",
-    description: "Extract colors and CSS variables from gradients.",
+    title: "Color utilities",
+    description:
+      "Convert gradient points to hex, RGB, HSL, or OKLCH to build palettes.",
   },
 ];
 
@@ -76,12 +49,67 @@ const quickStartCode = `import easyMeshGradient from "easy-mesh-gradient";
 // Generate a random gradient
 const gradient = easyMeshGradient();
 
-// Apply to an element
+// Apply it to any element
 document.body.style.backgroundImage = gradient;`;
 
-export const HomePage = function () {
+/** Crossfades between gradients as the value changes. */
+function GradientCrossfade({ gradient }: { gradient: string }) {
+  const [layers, setLayers] = useState([{ key: 0, gradient }]);
+  const counter = useRef(0);
+
+  useEffect(() => {
+    setLayers((prev) => {
+      if (prev[prev.length - 1]?.gradient === gradient) return prev;
+      return [...prev.slice(-1), { key: ++counter.current, gradient }];
+    });
+  }, [gradient]);
+
+  return (
+    <div className="absolute inset-0">
+      {layers.map((layer, i) => (
+        <div
+          key={layer.key}
+          className={`absolute inset-0 ${i > 0 ? "animate-[fade-in_0.6s_ease-out]" : ""}`}
+          style={{ backgroundImage: layer.gradient }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function InstallCommand() {
+  const [copied, setCopied] = useState(false);
+  const command = "npm install easy-mesh-gradient";
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(command);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <button
+      onClick={copy}
+      className="group flex items-center gap-3 rounded-xl bg-gray-100 px-4 py-2.5 transition-colors hover:bg-gray-200/70"
+    >
+      <code className="font-mono text-sm text-gray-700">{command}</code>
+      {copied ? (
+        <CheckIcon size={14} className="text-green-600" />
+      ) : (
+        <CopyIcon
+          size={14}
+          className="text-gray-400 group-hover:text-gray-600"
+        />
+      )}
+    </button>
+  );
+}
+
+const initialSeed = (Math.random() + 1).toString(36);
+
+export function HomePage() {
   const [state, setState] = useState<{ history: string[]; current: number }>({
-    history: [(Math.random() + 1).toString(36)],
+    history: [initialSeed],
     current: 0,
   });
 
@@ -95,11 +123,11 @@ export const HomePage = function () {
 
   return (
     <div className="bg-white">
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 pt-20 pb-24">
-          <div className="text-center mb-12">
-            <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight mb-4">
+        <div className="mx-auto max-w-6xl px-6 pt-20 pb-24">
+          <div className="mb-12 text-center">
+            <h1 className="mb-4 text-5xl font-semibold tracking-tight sm:text-6xl">
               <span
                 className="bg-clip-text text-transparent"
                 style={{ backgroundImage }}
@@ -107,98 +135,89 @@ export const HomePage = function () {
                 Easy Mesh Gradient
               </span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-2">
+            <p className="mx-auto mb-2 max-w-2xl text-xl text-gray-600">
               Beautiful CSS mesh gradients with zero dependencies
             </p>
             <p className="text-sm text-gray-400">v{libPkg.version}</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <div className="flex items-center bg-gray-100 rounded-xl px-4 py-2.5">
-              <code className="text-sm text-gray-700">
-                npm install easy-mesh-gradient
-              </code>
-            </div>
+          <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <InstallCommand />
             <Link to="/editor">
               <Button variant="primary">
                 Open Editor
-                <ArrowForwardRoundedIcon style={{ fontSize: 18 }} />
+                <ArrowRightIcon size={15} />
               </Button>
             </Link>
           </div>
 
-          {/* Gradient Preview */}
-          <div className="max-w-4xl mx-auto">
-            <div className="pb-[56.25%] relative rounded-3xl overflow-hidden shadow-2xl">
-              <Transitioner seed={state.history[state.current]}>
-                <div
-                  className="absolute inset-0"
-                  style={{ backgroundImage }}
-                />
-              </Transitioner>
+          <div className="mx-auto max-w-4xl">
+            <div className="relative overflow-hidden rounded-3xl pb-[56.25%] shadow-2xl">
+              <GradientCrossfade gradient={backgroundImage} />
             </div>
 
-            {/* Controls */}
-            <div className="flex items-center justify-center gap-3 mt-6">
+            <div className="mt-6 flex items-center justify-center gap-3">
               <Button
                 variant="secondary"
-                onClick={() => setState((x) => ({ ...x, current: x.current - 1 }))}
+                onClick={() =>
+                  setState((x) => ({ ...x, current: x.current - 1 }))
+                }
                 disabled={!canGoBack}
                 className={!canGoBack ? "opacity-40" : ""}
+                aria-label="Previous gradient"
               >
-                <ArrowBackIcon style={{ fontSize: 18 }} />
+                <ArrowLeftIcon size={15} />
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => setState((x) => ({ ...x, current: x.current + 1 }))}
+                onClick={() =>
+                  setState((x) => ({ ...x, current: x.current + 1 }))
+                }
                 disabled={!canGoForward}
                 className={!canGoForward ? "opacity-40" : ""}
+                aria-label="Next gradient"
               >
-                <ArrowForwardIcon style={{ fontSize: 18 }} />
+                <ArrowRightIcon size={15} />
               </Button>
               <Button
                 variant="primary"
-                onClick={() => {
+                onClick={() =>
                   setState((x) => ({
                     history: [
                       ...x.history.slice(0, x.current + 1),
                       (Math.random() + 1).toString(36),
                     ],
                     current: x.current + 1,
-                  }));
-                }}
+                  }))
+                }
               >
-                <CasinoIcon style={{ fontSize: 18 }} />
-                Randomize
+                <ShuffleIcon size={15} />
+                Shuffle
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features */}
       <section className="bg-gray-50 py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-semibold text-gray-900 mb-4">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-semibold text-gray-900">
               Features
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="mx-auto max-w-2xl text-lg text-gray-600">
               Everything you need to create stunning gradient backgrounds
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
               <Card key={feature.title} hover className="bg-white">
-                <feature.icon
-                  className="text-gray-400 mb-4"
-                  style={{ fontSize: 28 }}
-                />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="mb-2 text-lg font-medium text-gray-900">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm leading-relaxed text-gray-600">
                   {feature.description}
                 </p>
               </Card>
@@ -207,32 +226,29 @@ export const HomePage = function () {
         </div>
       </section>
 
-      {/* Quick Start Section */}
+      {/* Quick Start */}
       <section className="py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <div>
-              <h2 className="text-3xl font-semibold text-gray-900 mb-4">
+              <h2 className="mb-4 text-3xl font-semibold text-gray-900">
                 Quick Start
               </h2>
-              <p className="text-lg text-gray-600 mb-6">
-                Get started in seconds. Install the package, import the function,
-                and apply the gradient to any element.
+              <p className="mb-6 text-lg text-gray-600">
+                Install the package, import the function, and apply the gradient
+                to any element. Or design one visually in the editor and export
+                it in the format you need.
               </p>
               <div className="flex gap-3">
+                <Link to="/editor">
+                  <Button variant="primary">Open Editor</Button>
+                </Link>
                 <a
                   href="https://github.com/sFrady20/easy-mesh-gradient/blob/main/lib/README.md"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <Button variant="secondary">View Documentation</Button>
-                </a>
-                <a
-                  href="https://www.npmjs.com/package/easy-mesh-gradient"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="ghost">NPM Package</Button>
                 </a>
               </div>
             </div>
@@ -242,43 +258,6 @@ export const HomePage = function () {
           </div>
         </div>
       </section>
-
-      {/* Tools Section */}
-      <section className="bg-gray-50 py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-semibold text-gray-900 mb-4">Tools</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Interactive tools to help you create and customize gradients
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {tools.map((tool) => (
-              <Link key={tool.path} to={tool.path}>
-                <Card
-                  hover
-                  className="h-full bg-white group cursor-pointer"
-                >
-                  <h3 className="text-lg font-medium text-gray-900 mb-2 group-hover:text-gray-700 transition-colors">
-                    {tool.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {tool.description}
-                  </p>
-                  <div className="mt-4 flex items-center text-sm font-medium text-gray-400 group-hover:text-gray-600 transition-colors">
-                    Open tool
-                    <ArrowForwardRoundedIcon
-                      style={{ fontSize: 16 }}
-                      className="ml-1"
-                    />
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   );
-};
+}

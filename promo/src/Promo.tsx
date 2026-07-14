@@ -1,5 +1,5 @@
 import { AbsoluteFill } from "remotion";
-import { CodeReveal, CODE_COMPLETE_FRAME } from "./components/CodeReveal";
+import { CodeReveal } from "./components/CodeReveal";
 import { GradientReveal } from "./components/GradientReveal";
 import { Outro } from "./components/Outro";
 

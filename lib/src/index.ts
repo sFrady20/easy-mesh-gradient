@@ -1,13 +1,13 @@
-import { easeInOutCubic } from "./easings";
-import { defaultPointsGenerator } from "./generators";
-import type { GradientOptions, Point, PointGenerationOptions } from "./types";
-import { validatePoints } from "./validation";
+import { computeStops, resolvePoints } from "./core";
+import { pointToHsla } from "./colors";
+import type { GradientOptions } from "./types";
 
 /**
  * Generates a CSS mesh gradient string from points or generation options.
  *
- * The function creates a beautiful mesh gradient using CSS radial gradients
- * positioned at specific points with color transitions controlled by easing functions.
+ * The gradient is built from stacked CSS radial gradients, one per point,
+ * with alpha transitions controlled by an easing function, over an opaque
+ * base layer using the first point's color.
  *
  * @param options - Configuration options for the gradient
  * @returns CSS gradient string that can be used as a background-image
@@ -45,77 +45,63 @@ import { validatePoints } from "./validation";
  * @public
  */
 function easyMeshGradient(options?: GradientOptions): string {
-  const { easing = easeInOutCubic, easingStops = 10 } = options || {};
+  const points = resolvePoints(options);
+  if (points.length === 0) return "";
 
-  // Validate easingStops
-  const stops = Math.max(2, Math.floor(easingStops));
+  const stops = computeStops(options?.easing, options?.easingStops);
 
-  let points: Point[] = [];
-
-  // Determine if we're using explicit points or generating them
-  if (options && "points" in options && Array.isArray(options.points)) {
-    points = validatePoints(options.points);
-  } else {
-    const generationOptions = options as PointGenerationOptions | undefined;
-    const { pointsGenerator = defaultPointsGenerator } = generationOptions || {};
-    const generated = pointsGenerator(generationOptions);
-    points = validatePoints(generated);
-  }
-
-  // Return empty string if no valid points
-  if (points.length === 0) {
-    return "";
-  }
-
-  // Use first point as background color
-  const bg = points[0];
-
-  // Generate gradient stops for each point
-  const gradientStops = Array.from({ length: stops }, (_, i) => {
-    const progress = i / (stops - 1);
-    return progress;
-  });
-
-  // Build radial gradients for each point
   const radialGradients = points
-    .map((pt) => {
-      const stops = gradientStops
-        .map((progress) => {
-          const alpha = easing(1 - progress);
-          const position = progress * pt.scale * 100;
-          return `hsla(${Math.round(pt.h % 360)}, ${Math.round(pt.s * 100)}%, ${Math.round(pt.l * 100)}%, ${alpha.toFixed(3)}) ${position.toFixed(2)}%`;
-        })
+    .map((point) => {
+      const layerStops = stops
+        .map(
+          ({ progress, alpha }) =>
+            `${pointToHsla(point, alpha)} ${(progress * point.scale * 100).toFixed(2)}%`
+        )
         .join(", ");
-
-      return `radial-gradient(at ${(pt.x * 100).toFixed(2)}% ${(pt.y * 100).toFixed(2)}%, ${stops})`;
+      return `radial-gradient(at ${(point.x * 100).toFixed(2)}% ${(point.y * 100).toFixed(2)}%, ${layerStops})`;
     })
     .join(", ");
 
-  // Add base linear gradient for fallback
-  const bgColor = `hsla(${Math.round(bg.h % 360)}, ${Math.round(bg.s * 100)}%, ${Math.round(bg.l * 100)}%, 1)`;
-  const linearGradient = `linear-gradient(${bgColor}, ${bgColor})`;
-
-  return `${radialGradients}, ${linearGradient}`;
+  // Opaque base layer using the first point's color
+  const baseColor = pointToHsla(points[0], 1);
+  return `${radialGradients}, linear-gradient(${baseColor}, ${baseColor})`;
 }
 
-// Named export for better tree-shaking and explicit imports
 export { easyMeshGradient };
-
-// Default export for backward compatibility
 export default easyMeshGradient;
 
-// Re-export types and utilities for advanced usage
-export type { Point, GradientOptions, EasingOptions, PointGenerationOptions, EasingFunction } from "./types";
+export type {
+  Point,
+  GradientOptions,
+  EasingOptions,
+  PointGenerationOptions,
+  EasingFunction,
+} from "./types";
 export { defaultPointsGenerator, gridPointsGenerator } from "./generators";
 export {
-  easeInOutCubic,
+  easings,
   linear,
   easeInQuad,
   easeOutQuad,
   easeInOutQuad,
   easeInCubic,
   easeOutCubic,
+  easeInOutCubic,
   easeInOutSine,
   easeInOutExpo,
 } from "./easings";
+export type { EasingName } from "./easings";
 export { validatePoint, validatePoints } from "./validation";
+export {
+  hslToRgb,
+  hslToHex,
+  hexToHsl,
+  hslToOklch,
+  pointToHsla,
+  pointToHsl,
+  pointToHex,
+  pointToRgb,
+  pointToOklch,
+} from "./colors";
+export { renderMeshGradient } from "./canvas";
+export type { CanvasRenderOptions } from "./canvas";

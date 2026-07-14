@@ -4,15 +4,11 @@
 
 A lightweight, zero-dependency library for generating beautiful CSS mesh gradients with TypeScript support.
 
-## Documentation
-
-For complete documentation, API reference, and examples, see the **[Library Documentation](./lib/README.md)**.
-
 ## Quick Links
 
 - [NPM Package](https://www.npmjs.com/package/easy-mesh-gradient)
-- [Live Demo & Editor](https://sfrady20.github.io/easy-mesh-gradient)
-- [API Documentation](./lib/README.md)
+- [Live Editor](https://easy-mesh-gradient.stevenfrady.com)
+- [Library Documentation](./lib/README.md)
 
 ## Quick Start
 
@@ -20,7 +16,7 @@ For complete documentation, API reference, and examples, see the **[Library Docu
 npm install easy-mesh-gradient
 ```
 
-```tsx
+```ts
 import easyMeshGradient from "easy-mesh-gradient";
 
 const gradient = easyMeshGradient();
@@ -29,33 +25,38 @@ document.body.style.backgroundImage = gradient;
 
 ## Repository Structure
 
-This is a monorepo containing:
+This is a Bun workspace monorepo containing:
 
-- **`lib/`** - The easy-mesh-gradient npm package ([documentation](./lib/README.md))
-- **`pages/`** - The documentation website with interactive tools
+- **`lib/`** — the `easy-mesh-gradient` npm package ([documentation](./lib/README.md))
+- **`pages/`** — the website: a landing page and a visual gradient editor with multi-format export
+- **`promo/`** — a promo video built with [Remotion](https://www.remotion.dev)
 
 ## Development
 
 ```bash
-# Install dependencies
+# Install dependencies (all workspaces)
 bun install
 
-# Run the development server
+# Run the website dev server (bundles the library from source with HMR)
 bun run dev
 
 # Build the library
 bun run build
+
+# Build the website
+bun run build:pages
+
+# Lint and type-check
+bun run lint
+bun run type-check
 ```
 
-## Features
+The website aliases `easy-mesh-gradient` to `lib/src`, so library changes hot-reload in the site during development.
 
-- Zero dependencies
-- Full TypeScript support
-- 9 built-in easing functions
-- Seeded random generation for reproducible gradients
-- Grid pattern generator
-- Input validation and normalization
-- Tree-shakeable exports
+## Releases
+
+- **Website** — deployed to GitHub Pages automatically on pushes to `main` that touch `pages/` or the library source ([workflow](./.github/workflows/deploy-pages.yml)).
+- **npm package** — published automatically when a GitHub release is published ([workflow](./.github/workflows/publish.yml)). Auth uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC, no token secret) — the package on npmjs.com is configured to trust this repo's `publish.yml` workflow, and provenance is generated automatically. Bump `lib/package.json`'s version before releasing.
 
 ## License
 

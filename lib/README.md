@@ -4,27 +4,17 @@
 
 A lightweight, zero-dependency library for generating beautiful CSS mesh gradients with TypeScript support.
 
+Try it visually in the [live editor](https://easy-mesh-gradient.stevenfrady.com).
+
 ## Installation
 
 ```bash
 npm install easy-mesh-gradient
 ```
 
-or
-
-```bash
-yarn add easy-mesh-gradient
-```
-
-or
-
-```bash
-pnpm add easy-mesh-gradient
-```
-
 ## Quick Start
 
-```tsx
+```ts
 import easyMeshGradient from "easy-mesh-gradient";
 
 // Simple usage with defaults
@@ -34,163 +24,97 @@ document.body.style.backgroundImage = gradient;
 
 ## Usage
 
-### Basic Usage
+### With Generation Options
 
-```tsx
+```ts
 import easyMeshGradient from "easy-mesh-gradient";
 
-const gradient = easyMeshGradient();
-document.body.style.backgroundImage = gradient;
+const gradient = easyMeshGradient({
+  seed: "my-gradient", // reproducible output
+  pointCount: 8,
+  hueRange: [180, 240], // blues only
+  saturationRange: [0.6, 1],
+  lightnessRange: [0.4, 0.7],
+  scaleRange: [0.5, 1.5],
+});
 ```
 
 ### With Custom Points
 
-```tsx
+```ts
 import easyMeshGradient from "easy-mesh-gradient";
 
 const gradient = easyMeshGradient({
   points: [
     { x: 0.1, y: 0.1, h: 120, s: 0.8, l: 0.6, scale: 1 },
-    { x: 0.5, y: 0.5, h: 60, s: 0.7, l: 0.5, scale: 1.5 },
-    { x: 0.9, y: 0.9, h: 300, s: 0.6, l: 0.4, scale: 1 },
+    { x: 0.9, y: 0.9, h: 300, s: 0.6, l: 0.4, scale: 1.5 },
   ],
   easingStops: 20,
 });
-
-document.body.style.backgroundImage = gradient;
 ```
 
-### With Generation Options
+### With a Custom Easing
 
-```tsx
-import easyMeshGradient from "easy-mesh-gradient";
+```ts
+import easyMeshGradient, { easeInOutExpo } from "easy-mesh-gradient";
 
 const gradient = easyMeshGradient({
-  seed: "my-gradient", // Reproducible gradient
-  pointCount: 8,
-  hueRange: [180, 240], // Blue-green range
-  saturationRange: [0.6, 0.9],
-  lightnessRange: [0.4, 0.7],
+  easing: easeInOutExpo,
   easingStops: 15,
 });
-```
 
-### Using Named Exports
-
-```tsx
-import {
-  easyMeshGradient,
-  easeInOutSine,
-  gridPointsGenerator,
-  validatePoint,
-} from "easy-mesh-gradient";
-
-// Use different easing
-const gradient = easyMeshGradient({
-  easing: easeInOutSine,
-  pointCount: 5,
-});
-
-// Use grid generator
-const gridGradient = easyMeshGradient({
-  pointsGenerator: (options) => gridPointsGenerator(options, 4, 4),
-});
+// Or any (x: number) => number mapping [0, 1] to [0, 1]
+const custom = easyMeshGradient({ easing: (x) => x * x });
 ```
 
 ## API Reference
 
 ### `easyMeshGradient(options?)`
 
-Generates a CSS mesh gradient string.
-
-**Parameters:**
-
-- `options` (optional): Configuration object
-
-**Returns:** `string` - CSS gradient string
+Returns a CSS gradient string (stacked `radial-gradient`s over an opaque base layer) for use as a `background-image`. The first point paints on top and sets the base color.
 
 ### Options
 
-#### `points?: Point[]`
+All options are optional.
 
-An array of points that define the mesh gradient. Each point has:
+| Option            | Type                    | Default          | Description                                                                 |
+| ----------------- | ----------------------- | ---------------- | --------------------------------------------------------------------------- |
+| `points`          | `Point[]`               | generated        | Explicit points. When provided, generation options are ignored.             |
+| `easing`          | `(x: number) => number` | `easeInOutCubic` | Controls the alpha falloff curve of each point.                             |
+| `easingStops`     | `number`                | `10`             | Number of color stops per point (min 2). More stops = smoother, longer CSS. |
+| `seed`            | `string`                | random           | Seed for reproducible generation. Same seed, same gradient.                 |
+| `pointCount`      | `number`                | `5`              | Number of points to generate (min 1).                                       |
+| `hueRange`        | `[number, number]`      | `[0, 360]`       | Hue range. `min > max` wraps around the color wheel (e.g. `[300, 60]`).     |
+| `saturationRange` | `[number, number]`      | `[0.5, 1]`       | Saturation range (0–1).                                                     |
+| `lightnessRange`  | `[number, number]`      | `[0.5, 1]`       | Lightness range (0–1).                                                      |
+| `scaleRange`      | `[number, number]`      | `[0.5, 2]`       | Range for each point's fade size.                                           |
+| `pointsGenerator` | `(options?) => Point[]` | scatter          | Custom point generation function.                                           |
 
-- `x`: X coordinate (0-1, where 0 = left, 1 = right)
-- `y`: Y coordinate (0-1, where 0 = top, 1 = bottom)
-- `h`: Hue (0-360)
-- `s`: Saturation (0-1)
-- `l`: Lightness (0-1)
-- `scale`: Scale factor for gradient fade size (≥ 0.1)
+### `Point`
 
-If not provided, points will be generated automatically.
+```ts
+type Point = {
+  x: number; // 0-1, left to right
+  y: number; // 0-1, top to bottom
+  h: number; // hue, 0-360
+  s: number; // saturation, 0-1
+  l: number; // lightness, 0-1
+  scale: number; // fade size multiplier
+};
+```
 
-#### `easing?: (x: number) => number`
+## Exports
 
-Easing function for gradient transitions. Accepts 0-1, returns 0-1.
+Everything is exported from the package root:
 
-**Available easing functions:**
-- `linear` - No acceleration
-- `easeInQuad`, `easeOutQuad`, `easeInOutQuad` - Quadratic easing
-- `easeInCubic`, `easeOutCubic`, `easeInOutCubic` - Cubic easing (default)
-- `easeInOutSine` - Smooth sine curve
-- `easeInOutExpo` - Exponential curve
+```ts
+import easyMeshGradient, {
+  // Generators
+  defaultPointsGenerator,
+  gridPointsGenerator,
 
-**Default:** `easeInOutCubic`
-
-#### `easingStops?: number`
-
-Number of intermediate color stops (minimum 2). Higher = smoother but larger CSS.
-
-**Default:** `10`
-
-#### `seed?: string`
-
-Seed for reproducible random point generation. Same seed = same gradient.
-
-#### `pointCount?: number`
-
-Number of points to generate (minimum 1).
-
-**Default:** `5`
-
-#### `scaleRange?: [number, number]`
-
-Min/max scale values for generated points.
-
-**Default:** `[0.5, 2]`
-
-#### `hueRange?: [number, number]`
-
-Min/max hue values (0-360) for generated points.
-
-**Default:** `[0, 360]`
-
-#### `saturationRange?: [number, number]`
-
-Min/max saturation values (0-1) for generated points.
-
-**Default:** `[0.5, 1]`
-
-#### `lightnessRange?: [number, number]`
-
-Min/max lightness values (0-1) for generated points.
-
-**Default:** `[0.5, 1]`
-
-#### `pointsGenerator?: (options?) => Point[]`
-
-Custom function to generate points. Use `defaultPointsGenerator` or `gridPointsGenerator`.
-
-## Advanced Usage
-
-### Available Exports
-
-```tsx
-import {
-  // Main function
-  easyMeshGradient,
-  
-  // Easing functions
+  // Easings
+  easings, // Record<EasingName, EasingFunction>
   linear,
   easeInQuad,
   easeOutQuad,
@@ -200,142 +124,131 @@ import {
   easeInOutCubic,
   easeInOutSine,
   easeInOutExpo,
-  
-  // Point generators
-  defaultPointsGenerator,
-  gridPointsGenerator,
-  
-  // Validation utilities
+
+  // Validation
   validatePoint,
   validatePoints,
-  
-  // Types
-  type Point,
-  type GradientOptions,
-  type EasingFunction,
+
+  // Color utilities
+  hslToRgb,
+  hslToHex,
+  hexToHsl,
+  hslToOklch,
+  pointToHsla,
+  pointToHsl,
+  pointToHex,
+  pointToRgb,
+  pointToOklch,
+
+  // Canvas rendering
+  renderMeshGradient,
+} from "easy-mesh-gradient";
+
+import type {
+  Point,
+  GradientOptions,
+  EasingOptions,
+  PointGenerationOptions,
+  EasingFunction,
+  EasingName,
+  CanvasRenderOptions,
 } from "easy-mesh-gradient";
 ```
 
+## Advanced Usage
+
 ### Grid Pattern Generator
 
-```tsx
-import { easyMeshGradient, gridPointsGenerator } from "easy-mesh-gradient";
+```ts
+import easyMeshGradient, { gridPointsGenerator } from "easy-mesh-gradient";
 
+// 3x3 grid of points with randomized colors
 const gradient = easyMeshGradient({
-  pointsGenerator: (options) => gridPointsGenerator(options, 4, 4), // 4x4 grid
+  pointsGenerator: (options) => gridPointsGenerator(options, 3, 3),
+  seed: "structured",
 });
 ```
 
-### Custom Easing
+### Rendering to Canvas (image export)
 
-```tsx
-import { easyMeshGradient, easeInOutSine } from "easy-mesh-gradient";
+`renderMeshGradient` draws the exact same gradient onto a 2D canvas context, which makes PNG/JPEG export easy:
 
-const gradient = easyMeshGradient({
-  easing: easeInOutSine,
-  pointCount: 8,
-});
+```ts
+import { renderMeshGradient } from "easy-mesh-gradient";
+
+const canvas = document.createElement("canvas");
+canvas.width = 1920;
+canvas.height = 1080;
+
+renderMeshGradient(canvas.getContext("2d")!, { seed: "wallpaper" });
+
+canvas.toBlob((blob) => {
+  // download or upload the image
+}, "image/png");
+```
+
+### Extracting a Color Palette
+
+```ts
+import {
+  defaultPointsGenerator,
+  pointToHex,
+  pointToOklch,
+} from "easy-mesh-gradient";
+
+const points = defaultPointsGenerator({ seed: "brand", pointCount: 5 });
+const hexPalette = points.map(pointToHex);
+const oklchPalette = points.map(pointToOklch);
+```
+
+### Building an Easing Picker
+
+```ts
+import { easings, type EasingName } from "easy-mesh-gradient";
+
+for (const [name, fn] of Object.entries(easings)) {
+  console.log(name, fn(0.5));
+}
 ```
 
 ### Input Validation
 
-```tsx
-import { validatePoint, validatePoints } from "easy-mesh-gradient";
-
-// Validate and normalize a single point
-const validPoint = validatePoint({
-  x: 1.5, // Will be clamped to 1
-  y: -0.1, // Will be clamped to 0
-  h: 400, // Will be clamped to 360
-  s: 0.8,
-  l: 0.6,
-  scale: 0.05, // Will be set to minimum 0.1
-});
-
-// Validate an array of points
-const validPoints = validatePoints([
-  { x: 0.5, y: 0.5, h: 120, s: 0.8, l: 0.6, scale: 1 },
-  { x: 1.2, y: -0.1, h: 240, s: 0.7, l: 0.5, scale: 1.5 },
-]);
-```
-
-## TypeScript Support
-
-Full TypeScript support with comprehensive type definitions:
-
-```tsx
-import type { Point, GradientOptions, EasingFunction } from "easy-mesh-gradient";
-
-const customEasing: EasingFunction = (x) => x * x;
-const points: Point[] = [
-  { x: 0.5, y: 0.5, h: 180, s: 0.8, l: 0.6, scale: 1 },
-];
-const options: GradientOptions = {
-  points,
-  easing: customEasing,
-  easingStops: 15,
-};
-```
+All inputs are validated and normalized automatically — values are clamped to valid ranges and missing properties get sensible defaults. `validatePoint` / `validatePoints` are exported if you want the same normalization for your own data.
 
 ## Examples
 
 ### React Component
 
 ```tsx
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import easyMeshGradient from "easy-mesh-gradient";
 
-function GradientBackground() {
-  const [gradient, setGradient] = useState("");
-
-  useEffect(() => {
-    setGradient(
-      easyMeshGradient({
-        seed: "my-app-gradient",
-        pointCount: 6,
-        hueRange: [200, 280],
-      })
-    );
-  }, []);
-
-  return (
-    <div
-      style={{
-        backgroundImage: gradient,
-        width: "100%",
-        height: "100vh",
-      }}
-    />
-  );
+function GradientBackground({ seed }: { seed: string }) {
+  const backgroundImage = useMemo(() => easyMeshGradient({ seed }), [seed]);
+  return <div style={{ backgroundImage }} />;
 }
 ```
 
 ### Reproducible Gradients
 
-```tsx
-// Same seed always produces the same gradient
-const gradient1 = easyMeshGradient({ seed: "consistent", pointCount: 5 });
-const gradient2 = easyMeshGradient({ seed: "consistent", pointCount: 5 });
-// gradient1 === gradient2
+```ts
+// These are always identical
+const a = easyMeshGradient({ seed: "hello" });
+const b = easyMeshGradient({ seed: "hello" });
 ```
 
-### Performance Tips
+## Performance Tips
 
-- Lower `easingStops` (5-10) for better performance
-- Use `seed` to cache gradients instead of regenerating
-- Prefer explicit `points` over generation for critical paths
+- Generate gradients once and reuse the string; regenerating on every render is wasted work.
+- Lower `easingStops` for shorter CSS output; raise it if you see banding.
+- Fewer points means fewer stacked `radial-gradient` layers for the browser to composite.
 
-## Features
+## Migrating from 0.1.x
 
-- ✨ **Zero dependencies** (except seedrandom for reproducible randomness)
-- 📦 **Tree-shakeable** - Import only what you need
-- 🎨 **Multiple easing functions** - 9 built-in easing options
-- 🔧 **Fully typed** - Complete TypeScript support
-- ✅ **Input validation** - Automatic value clamping and normalization
-- 🎲 **Reproducible** - Seed-based generation for consistent gradients
-- 🚀 **Lightweight** - Minimal bundle size
-- 🎯 **Flexible** - Use custom points or auto-generation
+- **Single entry point** — subpath imports (`easy-mesh-gradient/easings`, `/types`, `/generators`, `/validation`) were removed. Import everything from `"easy-mesh-gradient"`.
+- **Seeded output changed** — the internal PRNG was upgraded (better distribution). The same seed produces a different (nicer) gradient than 0.1.x.
+- **New in 0.2** — `easings` map, `EasingName` type, color utilities (`pointToHex`, `hslToOklch`, …), and `renderMeshGradient` for canvas/image export.
 
 ## License
 
-MIT
+MIT — created by [Steven Frady](https://stevenfrady.com)
