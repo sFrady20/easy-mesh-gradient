@@ -26,6 +26,30 @@ export type Point = {
 export type EasingFunction = (x: number) => number;
 
 /**
+ * Shape of each point's radial gradient.
+ *
+ * `"circle"` (the default) keeps every blob round regardless of the
+ * element's proportions. `"ellipse"` stretches with the element, matching
+ * the CSS `radial-gradient` default.
+ *
+ * @public
+ */
+export type GradientShape = "circle" | "ellipse";
+
+/**
+ * Options for the gradient's rendered shape.
+ *
+ * @public
+ */
+export type ShapeOptions = {
+  /**
+   * Shape of each point's radial gradient.
+   * @default "circle"
+   */
+  shape?: GradientShape;
+};
+
+/**
  * Options for controlling easing behavior in gradient transitions.
  *
  * @public
@@ -98,4 +122,5 @@ export type PointGenerationOptions = {
  * @public
  */
 export type GradientOptions = EasingOptions &
+  ShapeOptions &
   ({ points: Point[] } | PointGenerationOptions);

@@ -9,6 +9,7 @@ import {
   CopyIcon,
   ShuffleIcon,
 } from "../../components/icons";
+import { useBrandStore } from "../../stores/brand";
 import libPkg from "../../../../lib/package.json";
 
 const features = [
@@ -117,6 +118,12 @@ export function HomePage() {
     () => easyMeshGradient({ seed: state.history[state.current] }),
     [state]
   );
+
+  // Keep the navbar logo gradient in sync with the hero
+  const setBrandSeed = useBrandStore((s) => s.setSeed);
+  useEffect(() => {
+    setBrandSeed(state.history[state.current]);
+  }, [state, setBrandSeed]);
 
   const canGoBack = state.current > 0;
   const canGoForward = state.current < state.history.length - 1;

@@ -53,10 +53,10 @@ export function Preview({ gradient }: { gradient: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="relative flex-1">
+    <div className="relative h-full w-full">
       <div
         ref={containerRef}
-        className="relative h-full min-h-[380px] w-full overflow-visible rounded-3xl shadow-xl transition-[background-image]"
+        className="relative h-full w-full overflow-visible rounded-3xl shadow-xl"
         style={{ backgroundImage: gradient }}
       >
         {points.map((point) => (

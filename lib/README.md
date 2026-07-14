@@ -22,6 +22,22 @@ const gradient = easyMeshGradient();
 document.body.style.backgroundImage = gradient;
 ```
 
+### With React
+
+The library is framework-independent — it just returns a CSS string — so in React it's one line of style:
+
+```tsx
+import { useMemo } from "react";
+import easyMeshGradient from "easy-mesh-gradient";
+
+function Hero({ seed }: { seed: string }) {
+  const backgroundImage = useMemo(() => easyMeshGradient({ seed }), [seed]);
+  return <div style={{ backgroundImage }}>…</div>;
+}
+```
+
+Memoize (or generate outside the component) so the gradient isn't rebuilt on every render.
+
 ## Usage
 
 ### With Generation Options
@@ -73,6 +89,8 @@ const custom = easyMeshGradient({ easing: (x) => x * x });
 
 Returns a CSS gradient string (stacked `radial-gradient`s over an opaque base layer) for use as a `background-image`. The first point paints on top and sets the base color.
 
+Blobs are circles by default, so the gradient looks right on any element — wide banners included. Pass `shape: "ellipse"` if you want the blobs to stretch with the element's proportions instead.
+
 ### Options
 
 All options are optional.
@@ -80,6 +98,7 @@ All options are optional.
 | Option            | Type                    | Default          | Description                                                                 |
 | ----------------- | ----------------------- | ---------------- | --------------------------------------------------------------------------- |
 | `points`          | `Point[]`               | generated        | Explicit points. When provided, generation options are ignored.             |
+| `shape`           | `"circle" \| "ellipse"` | `"circle"`       | Blob shape. Circles stay round on any element; ellipses stretch with it.    |
 | `easing`          | `(x: number) => number` | `easeInOutCubic` | Controls the alpha falloff curve of each point.                             |
 | `easingStops`     | `number`                | `10`             | Number of color stops per point (min 2). More stops = smoother, longer CSS. |
 | `seed`            | `string`                | random           | Seed for reproducible generation. Same seed, same gradient.                 |
@@ -148,10 +167,13 @@ import type {
   Point,
   GradientOptions,
   EasingOptions,
+  ShapeOptions,
+  GradientShape,
   PointGenerationOptions,
   EasingFunction,
   EasingName,
   CanvasRenderOptions,
+  GrainOptions,
 } from "easy-mesh-gradient";
 ```
 
@@ -187,6 +209,18 @@ canvas.toBlob((blob) => {
 }, "image/png");
 ```
 
+It also supports an optional monochrome film-grain overlay:
+
+```ts
+renderMeshGradient(ctx, {
+  seed: "wallpaper",
+  grain: {
+    density: 0.5, // fraction of pixels affected (0-1)
+    intensity: 0.15, // maximum luminance shift (0-1)
+  },
+});
+```
+
 ### Extracting a Color Palette
 
 ```ts
@@ -217,18 +251,6 @@ All inputs are validated and normalized automatically — values are clamped to 
 
 ## Examples
 
-### React Component
-
-```tsx
-import { useMemo } from "react";
-import easyMeshGradient from "easy-mesh-gradient";
-
-function GradientBackground({ seed }: { seed: string }) {
-  const backgroundImage = useMemo(() => easyMeshGradient({ seed }), [seed]);
-  return <div style={{ backgroundImage }} />;
-}
-```
-
 ### Reproducible Gradients
 
 ```ts
@@ -247,6 +269,7 @@ const b = easyMeshGradient({ seed: "hello" });
 
 - **Single entry point** — subpath imports (`easy-mesh-gradient/easings`, `/types`, `/generators`, `/validation`) were removed. Import everything from `"easy-mesh-gradient"`.
 - **Seeded output changed** — the internal PRNG was upgraded (better distribution). The same seed produces a different (nicer) gradient than 0.1.x.
+- **Blobs are circles now** — 0.1.x used the CSS default ellipse, which stretches on oblong elements. Pass `shape: "ellipse"` for the old behavior.
 - **New in 0.2** — `easings` map, `EasingName` type, color utilities (`pointToHex`, `hslToOklch`, …), and `renderMeshGradient` for canvas/image export.
 
 ## License

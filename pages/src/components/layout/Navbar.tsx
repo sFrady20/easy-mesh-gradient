@@ -1,20 +1,25 @@
+import { useMemo } from "react";
 import { Link, useLocation } from "react-router";
+import easyMeshGradient from "easy-mesh-gradient";
 import { GitHubIcon } from "../icons";
+import { useBrandStore } from "../../stores/brand";
 
 export function Navbar() {
   const location = useLocation();
   const inEditor = location.pathname === "/editor";
+
+  // Follows the home page hero: shuffling there re-seeds the logo too
+  const seed = useBrandStore((s) => s.seed);
+  const logoGradient = useMemo(() => easyMeshGradient({ seed }), [seed]);
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-200/60 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-5">
         <Link to="/" className="flex items-center gap-2.5">
           <span
-            className="h-4 w-4 rounded-full"
-            style={{
-              background:
-                "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
-            }}
+            key={seed}
+            className="h-4 w-4 rounded-full shadow-sm animate-[pop_0.5s_var(--ease-spring)]"
+            style={{ backgroundImage: logoGradient }}
           />
           <span className="text-[15px] font-semibold tracking-tight text-gray-900">
             Easy Mesh Gradient

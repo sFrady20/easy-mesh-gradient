@@ -4,7 +4,10 @@ import {
   hexToHsl,
   pointToHex,
   pointToHsl,
+  pointToOklch,
+  pointToRgb,
   type EasingName,
+  type Point,
 } from "easy-mesh-gradient";
 import {
   ColorSwatch,
@@ -14,26 +17,44 @@ import {
   SliderField,
   Slider,
 } from "../../components/controls";
-import { GripIcon, PlusIcon, ShuffleIcon, XIcon } from "../../components/icons";
+import {
+  CheckIcon,
+  CopyIcon,
+  GripIcon,
+  PlusIcon,
+  ShuffleIcon,
+  XIcon,
+} from "../../components/icons";
 import { useEditorStore, type GeneratorKind } from "./store";
 
 const percent = (v: number) => `${Math.round(v * 100)}%`;
+
+type ColorFormat = "hex" | "rgb" | "hsl" | "oklch";
+
+const colorFormatters: Record<ColorFormat, (p: Point) => string> = {
+  hex: pointToHex,
+  rgb: pointToRgb,
+  hsl: pointToHsl,
+  oklch: pointToOklch,
+};
 
 function GenerateSection() {
   const generation = useEditorStore((s) => s.generation);
   const setGeneration = useEditorStore((s) => s.setGeneration);
   const shuffle = useEditorStore((s) => s.shuffle);
+  const dirty = useEditorStore((s) => s.dirty);
   const [showRanges, setShowRanges] = useState(false);
 
   return (
     <Section title="Generate">
       <div className="space-y-4">
         <div className="flex items-center gap-2">
+          {/* Manual point edits detach the gradient from its seed */}
           <input
             type="text"
-            value={generation.seed}
+            value={dirty ? "" : generation.seed}
             onChange={(e) => setGeneration({ seed: e.target.value })}
-            placeholder="Seed"
+            placeholder={dirty ? "edited manually — type a seed" : "Seed"}
             className="h-9 min-w-0 flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 font-mono text-[13px] focus:border-gray-400 focus:bg-white focus:outline-none"
             aria-label="Seed"
           />
@@ -151,10 +172,29 @@ function PointsSection() {
   const movePoint = useEditorStore((s) => s.movePoint);
   const dragFrom = useRef<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
+  // Rows are only draggable while the grip is pressed, so the sliders
+  // and swatches stay interactive
+  const [armed, setArmed] = useState<number | null>(null);
+  const [colorFormat, setColorFormat] = useState<ColorFormat>("hex");
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const copy = async (key: string, text: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopied(key);
+    setTimeout(() => setCopied(null), 1200);
+  };
+
+  const cssVariables = `:root {\n${points
+    .map(
+      (p, i) =>
+        `  --gradient-color-${i + 1}: ${colorFormatters[colorFormat](p)};`
+    )
+    .join("\n")}\n}`;
 
   return (
     <Section
       title={`Points · ${points.length}`}
+      defaultOpen={false}
       action={
         <button
           onClick={addPoint}
@@ -169,8 +209,12 @@ function PointsSection() {
         {points.map((point, i) => (
           <li
             key={point.id}
-            draggable
+            draggable={armed === i}
             onDragStart={() => (dragFrom.current = i)}
+            onDragEnd={() => {
+              setArmed(null);
+              setDragOver(null);
+            }}
             onDragOver={(e) => {
               e.preventDefault();
               setDragOver(i);
@@ -179,52 +223,100 @@ function PointsSection() {
             onDrop={() => {
               if (dragFrom.current !== null) movePoint(dragFrom.current, i);
               dragFrom.current = null;
+              setArmed(null);
               setDragOver(null);
             }}
-            className={`flex items-center gap-2.5 rounded-xl bg-gray-50 p-2 transition-shadow ${
+            className={`space-y-1.5 rounded-xl bg-gray-50 p-2 transition-shadow ${
               dragOver === i ? "ring-2 ring-gray-300" : ""
             }`}
           >
-            <span className="cursor-grab text-gray-300 hover:text-gray-500 active:cursor-grabbing">
-              <GripIcon size={14} />
-            </span>
-            <ColorSwatch
-              value={pointToHex(point)}
-              onChange={(hex) => {
-                const hsl = hexToHsl(hex);
-                if (hsl) updatePoint(point.id, hsl);
-              }}
-            />
-            <Slider
-              value={point.scale}
-              min={0.1}
-              max={3}
-              step={0.01}
-              color={pointToHsl({ ...point, l: Math.min(point.l, 0.7) })}
-              onChange={(e) =>
-                updatePoint(point.id, { scale: Number(e.target.value) })
-              }
-              aria-label="Point scale"
-            />
-            {i === 0 && (
-              <span className="rounded-md bg-gray-200 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-gray-600 uppercase">
-                Base
+            <div className="flex items-center gap-2">
+              <span
+                onPointerDown={() => setArmed(i)}
+                onPointerUp={() => setArmed(null)}
+                className="cursor-grab touch-none text-gray-300 hover:text-gray-500 active:cursor-grabbing"
+              >
+                <GripIcon size={14} />
               </span>
-            )}
-            <button
-              onClick={() => removePoint(point.id)}
-              className="shrink-0 rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-gray-600"
-              aria-label="Remove point"
-            >
-              <XIcon size={14} />
-            </button>
+              <ColorSwatch
+                value={pointToHex(point)}
+                onChange={(hex) => {
+                  const hsl = hexToHsl(hex);
+                  if (hsl) updatePoint(point.id, hsl);
+                }}
+                size={22}
+              />
+              <span className="min-w-0 flex-1 truncate font-mono text-xs text-gray-600">
+                {colorFormatters[colorFormat](point)}
+              </span>
+              {i === 0 && (
+                <span className="rounded-md bg-gray-200 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-gray-600 uppercase">
+                  Base
+                </span>
+              )}
+              <button
+                onClick={() =>
+                  copy(point.id, colorFormatters[colorFormat](point))
+                }
+                className="shrink-0 rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                aria-label={`Copy color as ${colorFormat}`}
+              >
+                {copied === point.id ? (
+                  <CheckIcon size={14} className="text-green-600" />
+                ) : (
+                  <CopyIcon size={14} />
+                )}
+              </button>
+              <button
+                onClick={() => removePoint(point.id)}
+                className="shrink-0 rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                aria-label="Remove point"
+              >
+                <XIcon size={14} />
+              </button>
+            </div>
+            <div className="pr-1 pl-6">
+              <Slider
+                value={point.scale}
+                min={0.1}
+                max={3}
+                step={0.01}
+                color={pointToHsl({ ...point, l: Math.min(point.l, 0.7) })}
+                onChange={(e) =>
+                  updatePoint(point.id, { scale: Number(e.target.value) })
+                }
+                aria-label="Point scale"
+              />
+            </div>
           </li>
         ))}
       </ul>
-      <p className="mt-2.5 text-[11px] leading-relaxed text-gray-400">
-        Drag rows to reorder layers — the first point paints on top and sets the
-        base color. The slider controls each point's spread.
-      </p>
+
+      <div className="mt-3 flex items-center gap-2">
+        <Segmented<ColorFormat>
+          options={[
+            { value: "hex", label: "Hex" },
+            { value: "rgb", label: "RGB" },
+            { value: "hsl", label: "HSL" },
+            { value: "oklch", label: "OKLCH" },
+          ]}
+          value={colorFormat}
+          onChange={setColorFormat}
+          className="flex-1"
+        />
+        <button
+          onClick={() => copy("css-vars", cssVariables)}
+          className="flex shrink-0 items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+          title="Copy all colors as CSS variables"
+        >
+          {copied === "css-vars" ? (
+            <CheckIcon size={13} className="text-green-600" />
+          ) : (
+            <CopyIcon size={13} />
+          )}
+          CSS vars
+        </button>
+      </div>
     </Section>
   );
 }

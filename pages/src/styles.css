@@ -19,6 +19,15 @@
   }
 }
 
+@keyframes pop {
+  from {
+    transform: scale(0.4);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
 body {
   @apply bg-gray-50 text-gray-900 antialiased;
 }

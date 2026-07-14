@@ -49,6 +49,8 @@ function easyMeshGradient(options?: GradientOptions): string {
   if (points.length === 0) return "";
 
   const stops = computeStops(options?.easing, options?.easingStops);
+  // "ellipse" is the CSS default, so only circles need the keyword
+  const shape = options?.shape === "ellipse" ? "" : "circle ";
 
   const radialGradients = points
     .map((point) => {
@@ -58,7 +60,7 @@ function easyMeshGradient(options?: GradientOptions): string {
             `${pointToHsla(point, alpha)} ${(progress * point.scale * 100).toFixed(2)}%`
         )
         .join(", ");
-      return `radial-gradient(at ${(point.x * 100).toFixed(2)}% ${(point.y * 100).toFixed(2)}%, ${layerStops})`;
+      return `radial-gradient(${shape}at ${(point.x * 100).toFixed(2)}% ${(point.y * 100).toFixed(2)}%, ${layerStops})`;
     })
     .join(", ");
 
@@ -74,6 +76,8 @@ export type {
   Point,
   GradientOptions,
   EasingOptions,
+  ShapeOptions,
+  GradientShape,
   PointGenerationOptions,
   EasingFunction,
 } from "./types";
@@ -104,4 +108,4 @@ export {
   pointToOklch,
 } from "./colors";
 export { renderMeshGradient } from "./canvas";
-export type { CanvasRenderOptions } from "./canvas";
+export type { CanvasRenderOptions, GrainOptions } from "./canvas";
