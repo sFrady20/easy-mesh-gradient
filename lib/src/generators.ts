@@ -1,6 +1,6 @@
-import type { Point, PointGenerationOptions } from "./types";
-import { validateGenerationOptions } from "./validation";
-import { createSeededRNG } from "./prng";
+import type { Point, PointGenerationOptions } from "./types.js";
+import { validateGenerationOptions } from "./validation.js";
+import { createSeededRNG } from "./prng.js";
 
 /** @internal */
 function randomInRange(rng: () => number, [min, max]: [number, number]) {

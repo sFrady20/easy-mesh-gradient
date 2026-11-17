@@ -1,6 +1,6 @@
 {
   "name": "easy-mesh-gradient",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Generate beautiful CSS mesh gradients with easing. Zero dependencies, full TypeScript support.",
   "type": "module",
   "license": "MIT",
@@ -17,7 +17,7 @@
         "default": "./dist/easy-mesh-gradient.js"
       },
       "require": {
-        "types": "./dist/index.d.ts",
+        "types": "./dist/index.d.cts",
         "default": "./dist/easy-mesh-gradient.umd.cjs"
       }
     }

@@ -1,4 +1,4 @@
-import type { EasingFunction } from "./types";
+import type { EasingFunction } from "./types.js";
 
 /**
  * Linear easing - no acceleration or deceleration.

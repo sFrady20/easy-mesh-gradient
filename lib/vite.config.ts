@@ -6,6 +6,16 @@ export default defineConfig({
     dts({
       include: ["src"],
       exclude: ["**/*.test.ts", "**/*.spec.ts"],
+      outDirs: ["dist", { dir: "dist", moduleFormat: "cjs" }],
+      beforeWriteFile: (filePath, content) =>
+        filePath.endsWith(".d.cts")
+          ? {
+              content: content.replace(
+                /(["'])(\.\.?\/[^"']+)\.js\1/g,
+                "$1$2.cjs$1"
+              ),
+            }
+          : undefined,
     }),
   ],
   build: {

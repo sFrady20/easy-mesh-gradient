@@ -1,6 +1,6 @@
-import { computeStops, resolvePoints } from "./core";
-import { pointToHsla } from "./colors";
-import type { GradientOptions } from "./types";
+import { computeStops, resolvePoints } from "./core.js";
+import { pointToHsla } from "./colors.js";
+import type { GradientOptions } from "./types.js";
 
 /**
  * Options for the film-grain overlay applied after rendering.

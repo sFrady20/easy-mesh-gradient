@@ -1,4 +1,4 @@
-import type { Point, PointGenerationOptions } from "./types";
+import type { Point, PointGenerationOptions } from "./types.js";
 
 /** @internal */
 function clamp(value: number, min: number, max: number): number {

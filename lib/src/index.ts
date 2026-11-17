@@ -1,6 +1,6 @@
-import { computeStops, resolvePoints } from "./core";
-import { pointToHsla } from "./colors";
-import type { GradientOptions } from "./types";
+import { computeStops, resolvePoints } from "./core.js";
+import { pointToHsla } from "./colors.js";
+import type { GradientOptions } from "./types.js";
 
 /**
  * Generates a CSS mesh gradient string from points or generation options.
@@ -80,8 +80,8 @@ export type {
   GradientShape,
   PointGenerationOptions,
   EasingFunction,
-} from "./types";
-export { defaultPointsGenerator, gridPointsGenerator } from "./generators";
+} from "./types.js";
+export { defaultPointsGenerator, gridPointsGenerator } from "./generators.js";
 export {
   easings,
   linear,
@@ -93,9 +93,9 @@ export {
   easeInOutCubic,
   easeInOutSine,
   easeInOutExpo,
-} from "./easings";
-export type { EasingName } from "./easings";
-export { validatePoint, validatePoints } from "./validation";
+} from "./easings.js";
+export type { EasingName } from "./easings.js";
+export { validatePoint, validatePoints } from "./validation.js";
 export {
   hslToRgb,
   hslToHex,
@@ -106,6 +106,6 @@ export {
   pointToHex,
   pointToRgb,
   pointToOklch,
-} from "./colors";
-export { renderMeshGradient } from "./canvas";
-export type { CanvasRenderOptions, GrainOptions } from "./canvas";
+} from "./colors.js";
+export { renderMeshGradient } from "./canvas.js";
+export type { CanvasRenderOptions, GrainOptions } from "./canvas.js";

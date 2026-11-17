@@ -1,12 +1,12 @@
-import { easeInOutCubic } from "./easings";
-import { defaultPointsGenerator } from "./generators";
+import { easeInOutCubic } from "./easings.js";
+import { defaultPointsGenerator } from "./generators.js";
 import type {
   EasingFunction,
   GradientOptions,
   Point,
   PointGenerationOptions,
-} from "./types";
-import { validatePoints } from "./validation";
+} from "./types.js";
+import { validatePoints } from "./validation.js";
 
 /**
  * A single stop of a gradient layer: how far along the fade it sits

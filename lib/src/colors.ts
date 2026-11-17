@@ -1,4 +1,4 @@
-import type { Point } from "./types";
+import type { Point } from "./types.js";
 
 /**
  * Converts HSL components to RGB.
